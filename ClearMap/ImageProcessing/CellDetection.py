@@ -43,7 +43,7 @@ from ClearMap.cluster.preprocessing import pth_update
 from ClearMap.Utils.Timer import Timer
 
 
-def detectCells(jobid, source, sink = None, method ="SpotDetection", processMethod = all, verbose = False, **parameter):
+def detectCells(jobid, source, sink = None, method ="SpotDetection", processMethod = "sequential", verbose = False, **parameter):
     """Detect cells in data
     
     This is a main script to start running the cell detection.    

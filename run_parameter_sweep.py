@@ -56,7 +56,9 @@ params={
 }
 
 
-def sweep_parameters_cluster(jobid, optimization_chunk = 10, pth=False, rescale=False, cleanup =True, **kwargs):
+def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
+                                     fIP_method_r, fIP_size_r, dCSP_threshold_r, 
+                                     tick, optimization_chunk = 6, pth=False, rescale=False, cleanup =True, **kwargs):
     '''Function to sweep parameters
     
     final outputs will be saved in outputdirectory/parameter_sweep
@@ -72,29 +74,7 @@ def sweep_parameters_cluster(jobid, optimization_chunk = 10, pth=False, rescale=
         kwargs (if not pth): 'params' from run_clearmap_cluster.py
     '''
 
-
-    ######################################################################################################
-    #NOTE: To adjust parameter sweep, modify ranges below
-    ######################################################################################################
-    rBP_size_r = range(3, 11, 2) #[5, 11] #range(5,19,2) ###evens seem to not be good
-    fEMP_hmax_r = [None]#[None, 5, 10, 20, 40]
-    fEMP_size_r = range(3, 11, 3)
-    fEMP_threshold_r = [None] #range(0,10)
-    fIP_method_r = ['Max'] #['Max, 'Mean']
-    fIP_size_r = range(5, 12, 3)
-    dCSP_threshold_r = range(50,300,75)#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
-    ######################################################################################################
-    ######################################################################################################
-    ######################################################################################################
     
-    
-    # calculate number of iterations
-    tick = 0
-    for rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold in product(rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r, fIP_method_r, fIP_size_r, dCSP_threshold_r):
-        tick +=1
-
-    sys.stdout.write('\n\nNumber of iterations is {}:'.format(tick))
-
     #make folder for final output:
     opt = kwargs['outputdirectory']; makedir(opt)
     out = opt+'/parameter_sweep'; makedir(out)
@@ -186,9 +166,32 @@ if __name__ == '__main__':
         arrayjob(stepid, cores=5, compression=1, **params)
 
 #%%
-    for jobid in range(144):
+        
+    ######################################################################################################
+    #NOTE: To adjust parameter sweep, modify ranges below
+    ######################################################################################################
+    rBP_size_r = range(3, 11, 2) #[5, 11] #range(5,19,2) ###evens seem to not be good
+    fEMP_hmax_r = [None]#[None, 5, 10, 20, 40]
+    fEMP_size_r = range(3, 11, 3)
+    fEMP_threshold_r = [None] #range(0,10)
+    fIP_method_r = ['Max'] #['Max, 'Mean']
+    fIP_size_r = [5]
+    dCSP_threshold_r = range(50,400,75)#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
+    ######################################################################################################
+    ######################################################################################################
+    ######################################################################################################
+    
+    # calculate number of iterations
+    tick = 0
+    for rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold in product(rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r, fIP_method_r, fIP_size_r, dCSP_threshold_r):
+        tick +=1
+
+    sys.stdout.write('\n\nNumber of iterations is {}:'.format(tick))
+ 
+    for jobid in range(tick):
         try:
-            sweep_parameters_cluster(jobid, cleanup = True, **params)
+            sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
+                                     fIP_method_r, fIP_size_r, dCSP_threshold_r, tick, cleanup = True, **params)
         except Exception as e:
             print('Jobid {}, Error given {}'.format(jobid, e))
 

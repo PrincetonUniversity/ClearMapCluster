@@ -47,7 +47,7 @@ import ClearMap.IO as io
 from ClearMap.Utils.ParameterTools import writeParameter
 from ClearMap.Utils.ProcessWriter import ProcessWriter;
 from ClearMap.Utils.Timer import Timer;
-from ClearMap.cluster.preprocessing import pth_update, listdirfull, makedir, writer
+from ClearMap.cluster.preprocessing import makedir
 import pickle
 
 def printSubStackInfo(subStack, out = sys.stdout):
@@ -62,13 +62,8 @@ def printSubStackInfo(subStack, out = sys.stdout):
 
 
 #define the subroutine for the processing
-def _processSubStack(dsr):
+def _processSubStack(sf, pp, sub, verbose):
     """Helper to process stack in parallel"""
-
-    sf  = dsr[0];
-    pp  = dsr[1];
-    sub = dsr[2];
-    verbose = dsr[3];
 
     timer = Timer();
     pw = ProcessWriter(sub["stackId"]);
@@ -519,7 +514,7 @@ def sequentiallyProcessStack_usingCluster(jobid, source, x = all, y = all, z = a
     
     # process in parallel
     pool = Pool(processes = processes);    
-    results = pool.map(_processSubStack, argdata);
+    results = pool.starmap(_processSubStack, argdata);
     
     #PICKLE DAT SHIT    
     if type(sink) == tuple: pckfld = os.path.join(sink[0][:sink[0].rfind('/')], 'cell_detection'); makedir(pckfld)

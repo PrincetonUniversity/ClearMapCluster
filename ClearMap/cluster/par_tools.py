@@ -93,7 +93,7 @@ def celldetection_operations(jobid, testing = False, **params):
     testing = (optional) if "True" will save out different parameters. Only do this while optimizing
     """
     #load    
-    dct=pth_update(set_parameters_for_clearmap(testing = testing, **params))
+    dct = pth_update(set_parameters_for_clearmap(testing = testing, **params))
 
     #set jobid    
     dct["ImageProcessingParameter"]["jobid"]=jobid

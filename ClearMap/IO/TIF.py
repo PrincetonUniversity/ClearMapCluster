@@ -18,7 +18,7 @@ Example:
 #:license: GNU, see LICENSE.txt for details.
 
 
-import numpy
+import numpy, imp
 import tifffile as tiff
 
 import ClearMap.IO as io
@@ -181,7 +181,7 @@ def copyData(source, sink):
 def test():    
     """Test TIF module"""  
     import ClearMap.IO.TIF as tif
-    reload(tif)
+    imp.reload(tif)
     
     from ClearMap.Settings import ClearMapPath as basedir
     import os
@@ -198,9 +198,9 @@ def test():
     print("writing raw image to: " + fn);    
     tif.writeData(fn, data);
 
-    print("Loading raw image from: " + fn));
+    print("Loading raw image from: " + fn);
     img = tif.readData(fn);  
-    print("Image size: " + str(img.shape)))
+    print("Image size: " + str(img.shape))
     
     diff = img - data;
     print((diff.max(), diff.min()))

@@ -45,7 +45,7 @@ the folder "Test/Data/CellShape/cellshape\_\\d{3}.tif".
 #:copyright: Copyright 2015 by Christoph Kirst, The Rockefeller University, New York City
 #:license: GNU, see LICENSE.txt for details.
 
-import sys
+import sys, imp
 import numpy
 
 
@@ -92,50 +92,29 @@ def detectSpots(img, detectSpotsParameter = None, correctIlluminationParameter =
 
     timer = Timer();
     
-    # normalize data -> to check
-    #img = img.astype("float");
-    #dmax = 0.075 * 65535;
-    #ids = img > dmax;
-    #img[ids] = dmax;
-    #img /= dmax; 
-    #out.write(timer.elapsedTime(head = "Normalization"));
-    #img = dataset[600:1000,1600:1800,800:830];
-    #img = dataset[600:1000,:,800:830];
-    
     # correct illumination
     correctIlluminationParameter = getParameter(detectSpotsParameter, "correctIlluminationParameter", correctIlluminationParameter);
     img1 = img.copy();
-    img1 = correctIllumination(img1, correctIlluminationParameter = correctIlluminationParameter, verbose = verbose, out = out, **parameter)   
+    img1 = correctIllumination(img1, correctIlluminationParameter = correctIlluminationParameter, 
+                               verbose = verbose, out = out, **parameter)   
 
     # background subtraction in each slice
     #img2 = img.copy();
     removeBackgroundParameter = getParameter(detectSpotsParameter, "removeBackgroundParameter", removeBackgroundParameter);
-    img2 = removeBackground(img1, removeBackgroundParameter = removeBackgroundParameter, verbose = verbose, out = out, **parameter)   
-    
-    # mask
-    #timer.reset();
-    #if mask == None: #explicit mask
-    #    mask = img > 0.01;
-    #    mask = binary_opening(mask, self.structureELement("Disk", (3,3,3)));
-    #img[img < 0.01] = 0; # masking in place  # extended maxima
-    #out.write(timer.elapsedTime(head = "Mask"));    
-    
+    img2 = removeBackground(img1, removeBackgroundParameter = removeBackgroundParameter, 
+                            verbose = verbose, out = out, **parameter)   
+
     #DoG filter
     filterDoGParameter = getParameter(detectSpotsParameter, "filterDoGParameter", filterDoGParameter);
     dogSize = getParameter(filterDoGParameter, "size", None);
     #img3 = img2.copy();    
     img3 = filterDoG(img2, filterDoGParameter = filterDoGParameter, verbose = verbose, out = out, **parameter);
     
-    # normalize    
-    #    imax = img.max();
-    #    if imax == 0:
-    #        imax = 1;
-    #    img /= imax;
-    
     # extended maxima
     findExtendedMaximaParameter = getParameter(detectSpotsParameter, "findExtendedMaximaParameter", findExtendedMaximaParameter);
     hMax = getParameter(findExtendedMaximaParameter, "hMax", None);
-    imgmax = findExtendedMaxima(img3, findExtendedMaximaParameter = findExtendedMaximaParameter, verbose = verbose, out = out, **parameter);
+    imgmax = findExtendedMaxima(img3, findExtendedMaximaParameter = findExtendedMaximaParameter,
+                                verbose = verbose, out = out, **parameter);
     
     #center of maxima
     if not hMax is None:
@@ -198,7 +177,7 @@ if __name__ == "__main__":
     
     import os
     import ClearMap.ImageProcessing.SpotDetection as self
-    reload(self)
+    imp.reload(self)
     import ClearMap.IO as io  
     import numpy as np
     import tifffile
