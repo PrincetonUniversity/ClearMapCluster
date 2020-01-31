@@ -24,15 +24,15 @@ systemdirectory = directorydeterminer()
 #'##' = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use '00'
 #e.g.: inputdictionary={path_1: [['regch', '00']], path_2: [['cellch', '00'], ['injch', '01']]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, 'LightSheetData/falkner-mouse/scooter/raw_data/191223_scooter_fmnp5_ventral_up_1_3x_488_016na_1hfds_z10um_100msec_10-35-25'): [['regch', '00']],
-os.path.join(systemdirectory, 'LightSheetData/falkner-mouse/scooter/raw_data/191223_scooter_fmnp5_ventral_up_1_3x_647_016na_1hfds_z10um_1500msec_09-49-14'): [['cellch', '00']]
+os.path.join(systemdirectory, 'LightSheetData/falkner-mouse/scooter/raw_data/191221_scooter_mfnp3_ventral_up_1_3x_488_016na_1hfds_z10um_100msec_17-13-37'): [['regch', '00']],
+os.path.join(systemdirectory, 'LightSheetData/falkner-mouse/scooter/raw_data/191221_scooter_mfnp3_ventral_up_1_3x_647_016na_1hfds_z10um_1500msec_16-27-58'): [['cellch', '00']]
 }
 
 ####Required inputs
 
 params={
 'inputdictionary': inputdictionary, #don't need to touch
-'outputdirectory': os.path.join(systemdirectory, 'LightSheetData/falkner-mouse/scooter/parameter_sweep/fmnp5'),
+'outputdirectory': os.path.join(systemdirectory, 'LightSheetData/falkner-mouse/scooter/parameter_sweep/mfnp3'),
 'resample' : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 'xyz_scale': (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 'tiling_overlap': 0.00, #percent overlap taken during tiling
@@ -172,29 +172,26 @@ if __name__ == '__main__':
     makedir(params['outputdirectory'])
 
     #get job id from SLURM
-    # print(sys.argv)
-    # print(os.environ["SLURM_ARRAY_TASK_ID"])
-    # jobid = int(os.environ["SLURM_ARRAY_TASK_ID"]) #int(sys.argv[2])
-    # stepid = int(sys.argv[1])
+#    print sys.argv
+#    print os.environ["SLURM_ARRAY_TASK_ID"]
+#    jobid = int(os.environ["SLURM_ARRAY_TASK_ID"]) #int(sys.argv[2])
+#    stepid = int(sys.argv[1])
+###make parameter dictionary and pickle file:
+    updateparams(os.getcwd(), **params) # e.g. single job assuming directory_determiner function has been properly set
+    #copy folder into output for records
+    if not os.path.exists(os.path.join(params['outputdirectory'], 'clearmap_cluster')): shutil.copytree(os.getcwd(), os.path.join(params['outputdirectory'], 'clearmap_cluster'), ignore=shutil.ignore_patterns('^.git')) #copy run folder into output to save run info
     
+    #run step 1 to populate fullsizedata folder
+    for stepid in range(0, 20):
+        arrayjob(stepid, cores=5, compression=1, **params)
+
+#%%
     for jobid in range(144):
         try:
-            #parameter sweep cell detection parameters. NOTE read all of functions description before using. VERY CPU intensive
-            sweep_parameters_cluster(jobid, **params, cleanup = True)
-        except:
-            try:
-                ###make parameter dictionary and pickle file:
-                updateparams(os.getcwd(), **params) # e.g. single job assuming directory_determiner function has been properly set
-                #copy folder into output for records
-                if not os.path.exists(os.path.join(params['outputdirectory'], 'clearmap_cluster')): shutil.copytree(os.getcwd(), os.path.join(params['outputdirectory'], 'clearmap_cluster'), ignore=shutil.ignore_patterns('^.git')) #copy run folder into output to save run info
-                #run step 1 to populate fullsizedata folder
-                arrayjob(0, cores=5, compression=1, **params) 
-                arrayjob(1, cores=5, compression=1, **params) 
-                
-                sweep_parameters_cluster(jobid, **params, cleanup = True)
-            except Exception as e:
-                print('Jobid {}, Error given {}'.format(jobid, e))
-    
-        #end server    
-        vdisplay.stop()
+            sweep_parameters_cluster(jobid, cleanup = True, **params)
+        except Exception as e:
+            print('Jobid {}, Error given {}'.format(jobid, e))
+
+    #end server    
+    vdisplay.stop()
                 

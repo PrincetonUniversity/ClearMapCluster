@@ -5,15 +5,9 @@ Created on Wed Feb 24 22:07:30 2016
 @author: tpisano
 """
 
-import os, sys, cv2, time, re, warnings, shutil, mmap, collections, random
-import numpy as np
-import SimpleITK as sitk
-from joblib import Parallel, delayed
-import multiprocessing as mp
-import scipy.stats
-import pickle
-import scipy.ndimage #zoom
-from skimage.external import tifffile
+import os, sys, cv2, time, re, warnings, shutil, mmap, collections, random, itertools, numpy as np, SimpleITK as sitk, multiprocessing as mp
+import scipy.stats, pickle, scipy.ndimage, tifffile
+from joblib import Parallel, delayed 
 from math import ceil
 from scipy.ndimage.interpolation import zoom
 from ClearMap.cluster.directorydeterminer import directorydeterminer
@@ -381,7 +375,7 @@ def process_planes(job, cores, compression, **kwargs):
             return 'ArrayJobID/SF exceeds number of planes'
         #####################stitch data############################            
         if vol.raw == True: ###check for raw data
-            stitchdct=flatten_stitcher(cores, vol.outdr, vol.tiling_overlap, vol.xtile, vol.ytile, zpln, dct, blndtype, intensitycorrection, vol.lightsheets)
+            stitchdct = flatten_stitcher(cores, vol.outdr, vol.tiling_overlap, vol.xtile, vol.ytile, zpln, dct, blndtype, intensitycorrection, vol.lightsheets)
         else: ###run stitch that takes preprocessed data
             # make numpy arrays of 3 channels (keys=channelstr, values=numpy array)
             stitchdct=stitcher(cores, vol.outdr, vol.tiling_overlap, vol.xtile, vol.ytile, zpln, dct, blndtype, intensitycorrection)   
@@ -554,6 +548,7 @@ def stitcher(cores, outdr, ovlp, xtile, ytile, zpln, dct, blndtype, intensitycor
     #easy way to set ch and zplnlst   
     ['stitching for ch_{}'.format(ch) for ch, zplnlst in dct.items()] #cheating way to set ch and zplnlst 
     ###dim setup   
+    zplnlst = list(itertools.chain.from_iterable(dct.values()))
     ydim, xdim =cv2.imread(zplnlst[0], -1).shape    
     xpxovlp=ovlp*xdim    
     ypxovlp=ovlp*ydim    
@@ -994,45 +989,7 @@ def tiffcombiner(jobid, **kwargs):
     shutil.rmtree(pth_update(vol_to_process))
     writer(pth_update(kwargs['outputdirectory']), '**************STEP 2********************\ntiffcombine step job({}):\n    {}\n    in {} seconds\n**********************'.format(jobid, vol_to_process, (time.time() - start)))      
     return
-    
-
-
-def writer(saveloc, texttowrite, flnm=None, verbose=True):
-    '''Function to write string of text into file title FileLog.txt.
-    Optional flnm input to change name of log'''
-    if flnm == None:
-        flnm = "LogFile.txt"
-    if verbose==True:
-        if os.path.exists(saveloc) == False:
-            with open(os.path.join(saveloc, flnm), "w") as filelog:
-                filelog.write(texttowrite)
-                filelog.close()
-            print(texttowrite)
-            return
-        elif os.path.exists(saveloc) == True:
-            with open(os.path.join(saveloc, flnm), "a") as filelog:
-                filelog.write(texttowrite)
-                filelog.close()
-            print(texttowrite)
-            return
-        else:
-            print ('Error using tracer.writer function')
-            return
-    elif verbose==False:
-        if os.path.exists(saveloc) == False:
-            with open(os.path.join(saveloc, flnm), "w") as filelog:
-                filelog.write(texttowrite)
-                filelog.close()
-            return
-        elif os.path.exists(saveloc) == True:
-            with open(os.path.join(saveloc, flnm), "a") as filelog:
-                filelog.write(texttowrite)
-                filelog.close()
-            return
-        else:
-            print ('Error using tracer.writer function')
-            return
-    
+        
 
 def summarycomparision(dr1, dr2, svloc, dr1search=None, dr2search=None):
     '''quick way to compare two summary outputs side by side, could be helpful for different masking parameters. dr2 should be the directory with more successfully completed files
@@ -1411,13 +1368,11 @@ def flatten_vol(volume_class):
     z_indx=matches[0].span('z')
     y_indx=matches[0].span('y')
     x_indx=matches[0].span('x')
-    ch_indx=matches[0].span('ch')
     ###determine number of channels, sheets, horizontal foci
     #chs=[]; [chs.append(matches[i].group('ch')[-2:]) for i in range(len(matches)) if matches[i].group('ch')[-2:] not in chs]
     chs=[]; [chs.append(matches[i].group('ch')[:]) for i in range(len(matches)) if matches[i].group('ch')[:] not in chs]
     assert str(volume_class.channel).zfill(4) in chs
     zplns=[]; [zplns.append(matches[i].group('z')) for i in range(len(matches)) if matches[i].group('z') not in zplns]; zplns.sort()
-    zmx=max(zplns)
     with tifffile.TiffFile(os.path.join(dr, ''.join(matches[0].groups()))) as tif:
         hf=len(tif.pages) #number of horizontal foci
         y,x=tif.pages[0].shape
@@ -1496,12 +1451,14 @@ def flatten_stitcher(cores, outdr, ovlp, xtile, ytile, zpln, dct, blndtype, inte
     ###zpln='0500'; dct=zdct[zpln]    
     #easy way to set ch and zplnlst   
     ['stitching for ch_{}'.format(ch[-2:]) for ch, zplnlst in dct.items()] #cheating way to set ch and zplnlst 
-    ###dim setup   
-    zplnlst = list(dct.values())
-    ydim, xdim =cv2.imread(zplnlst[-1], -1).shape    
-    xpxovlp=int(ovlp*xdim)
-    ypxovlp=int(ovlp*ydim)
-    tiles=len(zplnlst) ##number of tiles
+    ###dim setup  
+    zplnlst = list(itertools.chain.from_iterable(dct.values()))
+    
+    ydim, xdim = cv2.imread(zplnlst[-1], -1).shape    
+    
+    xpxovlp = int(ovlp*xdim)
+    ypxovlp = int(ovlp*ydim)
+    tiles = len(zplnlst) ##number of tiles
 ### blending setup
     if blndtype == 'linear':        
         alpha=np.tile(np.linspace(0, 1, num=xpxovlp), (ydim, 1)) ###might need to change 0-1 to 0-255?
@@ -1524,7 +1481,7 @@ def flatten_stitcher(cores, outdr, ovlp, xtile, ytile, zpln, dct, blndtype, inte
         except NameError:
             p=mp.Pool(cores)
         iterlst=[]; [iterlst.append((xdim, ydim, xtile, ytile, ovlp, xpxovlp, ypxovlp, tiles, alpha, yalpha, zpln, ch[-2:], zplnlst, intensitycorrection, lightsheets)) for ch, zplnlst in dct.items()]           
-        stitchlst=p.starmap(flatten_xystitcher, iterlst)
+        stitchlst = p.starmap(flatten_xystitcher, iterlst)
         stitchdct={}; [stitchdct.update(i) for i in stitchlst]
     del ydim, xdim, xpxovlp, ypxovlp, tiles, alpha, yalpha, iterlst, stitchlst
     p.terminate()
@@ -1543,9 +1500,9 @@ def flatten_xystitcher(xdim, ydim, xtile, ytile, ovlp, xpxovlp, ypxovlp, tiles, 
         imlst=list(tmplst); del tmplst
     #################################################
     #####account for one or two light sheets#########
-    if lightsheets ==2:    
-        l_ls_imlst=imlst[:len(imlst)/2] #left light sheet images
-        r_ls_imlst=imlst[len(imlst)/2:] #right light sheet images
+    if lightsheets == 2:    
+        l_ls_imlst=imlst[:int(len(imlst)/2)] #left light sheet images
+        r_ls_imlst=imlst[int(len(imlst)/2):] #right light sheet images
         lsts=[l_ls_imlst, r_ls_imlst]
     else:
         lsts=[imlst]
