@@ -1,6 +1,6 @@
 # ClearMapCluster
 
-T. Pisano's parallelization to a cluster of C. Kirst's ClearMap software (https://idisco.info/clearmap-2/) for use on a cluster using a slurm based scheduler. Installation instructions at bottom of this read me.
+T. Pisano's parallelization to a cluster of C. Kirst's ClearMap software (https://idisco.info/clearmap-2/) for use on a cluster using a slurm based scheduler. Installation instructions at bottom of this read me. Modifications by Zahra M. 
 
 ## *Descriptions of files*:
 For the most part ClearMap was not touched. Changes include, but not limited to:
@@ -42,24 +42,34 @@ For the most part ClearMap was not touched. Changes include, but not limited to:
 	* After downloading this package onto your data server (where the cluster has access to it), you will need to install the 'normal' version of clearmap (from my packages folder: 'clearmap_cluster') and it's dependencies on the cluster.
 
 ### Create a python Environment (Install anaconda if not already):
-* pip install SimpleITK xvfbwrapper cython opencv-python tifffile scipy scikit-image natsort h5py joblib
-* sudo apt-get install elastix
+```
+$ pip install SimpleITK xvfbwrapper cython opencv-python tifffile scipy scikit-image natsort h5py joblib
+$ sudo apt-get install elastix
+```
 
 ### Edit: clearmap_cluster/sub_clearmap_cluster.sh file:
 * Need to load anacondapy [version] on cluster (something like):
-	* module load anacondapy/5.3.1
+```
+module load anacondapy/5.3.1
+```
 * Need to load elastix on cluster (something like):
-	* module load elastix/4.8
+```
+module load elastix/4.8
+```
 * Need to then activate your python environment where everything is installed (something like):
-	* . activate idisco (or whatever you call your environment)
+```
+. activate idisco
+```
 * Check to make sure your slurm job dependecies and match structure is similar to what our cluster uses.
 
 ### Edit: clearmap_cluster/slurm_files:
 * Each of these needs the same changes as sub_clearmap_cluster.sh file: e.g.:
 
-	* module load anacondapy/5.3.1
-	* module load elastix/4.8
-	* . activate idisco
+```
+module load anacondapy/5.3.1
+module load elastix/4.8
+. activate idisco
+```
 * Check/change the resource allocations and email alerts at the top of each .sh file based on cluster and run_clearmap_cluster.py settings
 
 ### Edit: clearmap_cluster/ClearMap/cluster/directorydeterminer:
@@ -73,10 +83,15 @@ For the most part ClearMap was not touched. Changes include, but not limited to:
 * Possibly modify clearmap_cluster/clearmap/parameter_file.py for cell detection within the function:
 	* set_parameters_for_clearmap
 * Then generally the process is using a local machine, run step 0 (be sure that files are saved BEFORE( running this step) this generates a folder where data will be generated:
-	* updateparams(os.getcwd(), *params)
-	* if not os.path.exists(os.path.join(params['outputdirectory'], 'clearmap_cluster')): shutil.copytree(os.getcwd(), os.path.join(params['outputdirectory'], 'clearmap_cluster'))
+```
+updateparams(os.getcwd(), *params)
+if not os.path.exists(os.path.join(params['outputdirectory'], 'clearmap_cluster')): 
+	shutil.copytree(os.getcwd(), os.path.join(params['outputdirectory'], 'clearmap_cluster'))
+```
 	* for testing of clearmap cell detection use:
-		from ClearMap.cluster.par_tools import celldetection_operations
-		celldetection_operations(jobid, testing = True, **params)
-* then using the cluster's headnode (in the new folder's clearmap directory generated from the previous step) submit the batch job: sbatch sub_clearmap_cluster.sh
+```
+from ClearMap.cluster.par_tools import celldetection_operations
+celldetection_operations(jobid, testing = True, **params)
+```
+* then using the cluster's headnode (in the new folder's clearmap directory generated from the previous step) submit the batch job: `sbatch sub_clearmap_cluster.sh`
 
