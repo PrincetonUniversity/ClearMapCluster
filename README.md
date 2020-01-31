@@ -1,8 +1,8 @@
-##clearmap_cluster
+## ClearMapCluster
 
 T. Pisano's parallelization to a cluster of C. Kirst's ClearMap software (https://idisco.info/clearmap-2/) for use on a cluster using a slurm based scheduler. Installation instructions at bottom of this read me.
 
-##*Descriptions of files*:
+## *Descriptions of files*:
 For the most part ClearMap was not touched. Changes include, but not limited to:
 
 * *sub_clearmap_cluster.sh:*
@@ -37,19 +37,19 @@ For the most part ClearMap was not touched. Changes include, but not limited to:
 
 
 
-##*INSTALLATION INSTRUCTIONS*:
+## *INSTALLATION INSTRUCTIONS*:
 * Things you will need to do beforehand:
 	* Elastix needs to be compiled on the cluster - this was challenging for IT here and suspect it will be for your IT as well.
 	* After downloading this package onto your data server (where the cluster has access to it), you will need to install the 'normal' version of clearmap (from my packages folder: 'clearmap_cluster') and it's dependencies on the cluster. I suggest using an python environment to do this (2.7, not 3+; see below).
 
-#Create a python Environment (Install anaconda if not already):
+# Create a python Environment (Install anaconda if not already):
 * install ClearMap (follow instructions: https://idisco.info/clearmap-2/)
 * pip install SimpleITK xvfbwrapper cython
 * conda install opencv joblib scipy scikit-image natsort h5py joblib
 * conda install -c conda-forge tifffile=0.9.0
 * sudo apt-get install elastix
 
-#Edit: clearmap_cluster/sub_clearmap_cluster.sh file:
+# Edit: clearmap_cluster/sub_clearmap_cluster.sh file:
 * Need to load anacondapy 2.7 on cluster (something like):
 	* module load anacondapy/2.7
 * Need to load elastix on cluster (something like):
@@ -58,7 +58,7 @@ For the most part ClearMap was not touched. Changes include, but not limited to:
 	* . activate idisco (or whatever you call your environment)
 * Check to make sure your slurm job dependecies and match structure is similar to what our cluster uses.
 
-#Edit: clearmap_cluster/slurm_files:
+# Edit: clearmap_cluster/slurm_files:
 * Each of these needs the same changes as sub_clearmap_cluster.sh file: e.g.:
 
 	* module load anacondapy/2.7
@@ -66,10 +66,10 @@ For the most part ClearMap was not touched. Changes include, but not limited to:
 	* . activate idisco
 * Check/change the resource allocations and email alerts at the top of each .sh file based on cluster and run_clearmap_cluster.py settings
 
-#Edit: clearmap_cluster/ClearMap/cluster/directorydeterminer:
+# Edit: clearmap_cluster/ClearMap/cluster/directorydeterminer:
 * Add your paths for BOTH the cluster and local machinery
 
-#To run, please follow below:
+# To run, please follow below:
 * Open run_clearmap_cluster.py
 * For each brain modify:
 	* inputdictionary
@@ -84,4 +84,3 @@ For the most part ClearMap was not touched. Changes include, but not limited to:
 		celldetection_operations(jobid, testing = True, **params)
 * then using the cluster's headnode (in the new folder's clearmap directory generated from the previous step) submit the batch job: sbatch sub_clearmap_cluster.sh
 
-#Note: The multibrain analysis at the end has not been parallelized.
