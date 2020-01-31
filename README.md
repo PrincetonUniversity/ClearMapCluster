@@ -88,7 +88,9 @@ updateparams(os.getcwd(), *params)
 if not os.path.exists(os.path.join(params['outputdirectory'], 'clearmap_cluster')): 
 	shutil.copytree(os.getcwd(), os.path.join(params['outputdirectory'], 'clearmap_cluster'))
 ```
-	* for testing of clearmap cell detection use:
+
+* For testing of clearmap cell detection use:
+
 ```
 from ClearMap.cluster.par_tools import celldetection_operations
 celldetection_operations(jobid, testing = True, **params)
