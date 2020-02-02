@@ -6,7 +6,7 @@ Created on Tue Aug  7 20:41:01 2018
 @author: tpisano
 """
 
-import os, sys, shutil
+import os, sys, shutil, pickle
 from xvfbwrapper import Xvfb; vdisplay = Xvfb(); vdisplay.start()
 from ClearMap.cluster.preprocessing import updateparams, listdirfull, arrayjob, makedir, removedir
 from ClearMap.cluster.directorydeterminer import directorydeterminer
@@ -14,6 +14,7 @@ from itertools import product
 from ClearMap.cluster.par_tools import celldetection_operations
 import tifffile, numpy as np
 from skimage.exposure import rescale_intensity
+from ClearMap.cluster.utils import load_kwargs
 
 systemdirectory = directorydeterminer()
 ###set paths to data
@@ -58,7 +59,7 @@ params={
 
 def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
                                      fIP_method_r, fIP_size_r, dCSP_threshold_r, 
-                                     tick, optimization_chunk = 6, pth=False, rescale=False, cleanup =True, **kwargs):
+                                     tick, optimization_chunk = 4, pth=False, rescale=False, cleanup =True, **kwargs):
     '''Function to sweep parameters
     
     final outputs will be saved in outputdirectory/parameter_sweep
@@ -80,7 +81,6 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
     out = opt+'/parameter_sweep'; makedir(out)
     out0 = opt+'/parameter_sweep_jobid_{}'.format(str(jobid).zfill(4)); makedir(out0)
 
-    ntick = 0
     rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold=[(rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold) for rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold in product(rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r, fIP_method_r, fIP_size_r, dCSP_threshold_r)][jobid]
 
     pth = out0+'/parametersweep_rBP_size{}_fEMP_hmax{}_fEMP_size{}_fEMP_threshold{}_fIP_method{}_fIP_size{}_dCSP_threshold{}.tif'.format(rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold)
@@ -99,23 +99,26 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             kwargs['detectCellShapeParameter_threshold'] = dCSP_threshold # (float or None)      threshold to determine mask. Pixels below this are background if None no mask is generated
 
             #tmp
-            import pickle
-            from ClearMap.cluster.utils import load_kwargs
             nkwargs = load_kwargs(kwargs['outputdirectory'])
             kwargs['outputdirectory'] = out0
             nkwargs.update(kwargs)
             pckloc=out0+'/param_dict.p'; pckfl=open(pckloc, 'wb'); pickle.dump(nkwargs, pckfl); pckfl.close()
 
             #run cell detection
-            ntick+=1
-            sys.stdout.write('\n\n\n           *****Iteration {} of {}*****\n\n\n'.format(ntick, tick))
+            sys.stdout.write('\n\n\n           *****Iteration {} of {}*****\n\n\n'.format(jobid, tick))
             sys.stdout.write('    Iteration parameters: {}     {}     {}     {}     {}     {}     {}'.format(kwargs['removeBackgroundParameter_size'], kwargs['findExtendedMaximaParameter_hmax'], kwargs['findExtendedMaximaParameter_size'], kwargs['findExtendedMaximaParameter_threshold'],         kwargs['findIntensityParameter_method'],         kwargs['findIntensityParameter_size'],        kwargs['detectCellShapeParameter_threshold']))
             celldetection_operations(optimization_chunk, testing = True, **kwargs)
 
             #list, load, and maxip
-            if ntick == 1: raw = [xx for xx in listdirfull(out0+'/optimization/raw') if '~' not in xx and '.db' not in xx]; raw.sort(); raw_im = np.squeeze(tifffile.imread(raw)); raw_mx = np.max(raw_im, axis = 0)
-            bkg = [xx for xx in listdirfull(out0+'/optimization/background') if '~' not in xx and 'Thumbs.db' not in xx]; bkg.sort(); bkg_im = tifffile.imread(bkg); bkg_mx = np.max(bkg_im, axis = 0)
-            cell = [xx for xx in listdirfull(out0+'/optimization/cell') if '~' not in xx and '.db' not in xx]; cell.sort(); cell_im = tifffile.imread(cell); cell_mx = np.max(cell_im, axis = 0)
+            raw = [xx for xx in listdirfull(out0+'/optimization/raw') if '~' not in xx and '.db' not in xx]; raw.sort(); 
+            raw_im = np.squeeze(tifffile.imread(raw))
+            raw_mx = np.max(raw_im, axis = 0)
+            bkg = [xx for xx in listdirfull(out0+'/optimization/background') if '~' not in xx and 'Thumbs.db' not in xx]; bkg.sort()
+            bkg_im = tifffile.imread(bkg)
+            bkg_mx = np.max(bkg_im, axis = 0)
+            cell = [xx for xx in listdirfull(out0+'/optimization/cell') if '~' not in xx and '.db' not in xx]; cell.sort()
+            cell_im = tifffile.imread(cell) 
+            cell_mx = np.max(cell_im, axis = 0)
 
             #optional rescale:
             if rescale:
@@ -176,7 +179,7 @@ if __name__ == '__main__':
     fEMP_threshold_r = [None] #range(0,10)
     fIP_method_r = ['Max'] #['Max, 'Mean']
     fIP_size_r = [5]
-    dCSP_threshold_r = range(50,400,75)#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
+    dCSP_threshold_r = range(100,500,100)#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
     ######################################################################################################
     ######################################################################################################
     ######################################################################################################

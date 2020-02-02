@@ -493,8 +493,10 @@ def sequentiallyProcessStack_usingCluster(jobid, source, x = all, y = all, z = a
     #determine z ranges  
 
     subStacks = calculateSubStacks(source, x = x, y = y, z = z, 
-                                   processes = 1, chunkSizeMax = chunkSizeMax, chunkSizeMin = chunkSizeMin, chunkOverlap = chunkOverlap,
-                                   chunkOptimization = chunkOptimization, chunkOptimizationSize = chunkOptimizationSize, verbose = verbose);
+                                   processes = 1, chunkSizeMax = chunkSizeMax, chunkSizeMin = chunkSizeMin, 
+                                   chunkOverlap = chunkOverlap, chunkOptimization = chunkOptimization, 
+                                   chunkOptimizationSize = chunkOptimizationSize, 
+                                   verbose = verbose);
 
     nSubStacks = len(subStacks);
     if verbose:

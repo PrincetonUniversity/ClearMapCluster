@@ -45,8 +45,8 @@ def writeParameter(head = None, out = None, **args):
     if head is None:
         head = '';
         
-    keys = args.keys();
-    vals = args.values();
+    keys = list(args.keys());
+    vals = list(args.values());
     parsize = max([len(x) for x in keys]);
     
     s = [head + ' ' + keys[i].ljust(parsize) + ': ' + str(vals[i]) for i in range(len(keys))];
