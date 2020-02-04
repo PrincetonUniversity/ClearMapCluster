@@ -4,10 +4,9 @@ Created on Mon Oct  3 10:37:28 2016
 
 @author: tpisano
 """
-import os, sys, socket, shutil, numpy, math
-import pickle, numpy as np
+import os, sys, shutil, numpy
+import pickle
 from ClearMap.cluster.preprocessing import pth_update, makedir
-import ClearMap.Settings as settings
 import ClearMap.IO as io
 from ClearMap.Alignment.Resampling import resampleData;
 from ClearMap.Alignment.Elastix import alignData, transformPoints
@@ -16,20 +15,14 @@ from ClearMap.Alignment.Resampling import resamplePoints, resamplePointsInverse
 from ClearMap.Analysis.Label import countPointsInRegions
 from ClearMap.Analysis.Voxelization import voxelize
 from ClearMap.Analysis.Statistics import thresholdPoints
-from ClearMap.Utils.ParameterTools import joinParameter
 from ClearMap.Analysis.Label import labelToName
 from ClearMap.parameter_file import set_parameters_for_clearmap
-from ClearMap.cluster.preprocessing import pth_update, listdirfull, makedir, writer
+from ClearMap.cluster.preprocessing import listdirfull
 from ClearMap.ImageProcessing.StackProcessing import calculateSubStacks, noProcessing, joinPoints
-try:
-    import tifffile
-except:
-    from skimage.external import tifffile
+import tifffile
 from scipy.ndimage.interpolation import zoom
 import multiprocessing as mp
 
-
-#%%
     
 def resample_folder(cores, inn, out, zoomfactor, compression=0):
     """Function to take as input folder of tiff images, resize and save
@@ -53,7 +46,6 @@ def resample_folder_helper(out, inn, fl, zoomfactor, compression):
     return
     
 
-#%%
 
 def resampling_operations(jobid, **params):
     """Assumes variables will be global from execfile step
@@ -70,7 +62,7 @@ def resampling_operations(jobid, **params):
     if jobid == 2: resampleData(**dct["RegistrationResamplingParameter"])
         
     return
-#%%        
+        
 def alignment_operations(jobid, **params):
     """Assumes variables will be global from execfile step
     """
@@ -83,10 +75,10 @@ def alignment_operations(jobid, **params):
     #alignment to the Atlas:
     if jobid == 1: resultDirectory  = alignData(**dct["RegistrationAlignmentParameter"]);
         
-    return
+    return resultDirectory
 
         
-#%%
+
 def celldetection_operations(jobid, testing = False, **params):
     """Assumes variables will be global from execfile step
     
@@ -114,7 +106,7 @@ def celldetection_operations(jobid, testing = False, **params):
     return
 
 
-#%%
+
 def join_results_from_cluster(**params):
     
     #load    
@@ -158,9 +150,6 @@ def join_results_from_cluster_helper(source, x = all, y = all, z = all, sink = N
 
 
 
-
-
-#%%
 def output_analysis(threshold = (20, 900), row = (3,3), check_cell_detection = False, **params):
     """Wrapper for analysis:
     
@@ -250,7 +239,6 @@ def output_analysis(threshold = (20, 900), row = (3,3), check_cell_detection = F
     
     return
             
-#%%
 def group_output_analysis(lst, threshold = (20, 900), row = (3,3), check_cell_detection = False):
     """Perform analysis on a group of files
     
