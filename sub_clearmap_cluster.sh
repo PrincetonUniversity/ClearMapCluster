@@ -6,7 +6,7 @@
 #SBATCH -o logs/outmain_tracing.out        # STDOUT
 #SBATCH -e logs/outmain_tracing.err        # STDERR
 
-module load anacondapy/2.7
+module load anacondapy/5.3.1
 module load elastix/4.8
 . activate idisco
 

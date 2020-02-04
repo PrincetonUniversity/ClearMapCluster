@@ -19,7 +19,7 @@ echo "Array Index: $SLURM_ARRAY_TASK_ID"
 
 
 
-module load anacondapy/2.7
+module load anacondapy/5.3.1
 module load elastix/4.8
 . activate idisco
 
