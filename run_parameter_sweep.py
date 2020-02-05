@@ -134,7 +134,7 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             
             #save in main
             npth = out+"/jobid_{}_parametersweep_rBP_size{}_fEMP_hmax{}_fEMP_size{}_fEMP_threshold{}_fIP_method{}_fIP_size{}_dCSP_threshold{}.tif".format(str(jobid).zfill(4), rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold)
-            tifffile.imsave(npth, bigim, compress = 1)
+            tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
             
 
         except Exception as e:
@@ -173,13 +173,13 @@ if __name__ == "__main__":
     ######################################################################################################
     #NOTE: To adjust parameter sweep, modify ranges below
     ######################################################################################################
-    rBP_size_r = range(3, 11, 2) #[5, 11] #range(5,19,2) ###evens seem to not be good
+    rBP_size_r = [5] ###evens seem to not be good
     fEMP_hmax_r = [None]#[None, 5, 10, 20, 40]
-    fEMP_size_r = range(3, 11, 3)
+    fEMP_size_r = [0]
     fEMP_threshold_r = [None] #range(0,10)
     fIP_method_r = ["Max"] #["Max, "Mean"]
-    fIP_size_r = [5]
-    dCSP_threshold_r = range(100,500,100)#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
+    fIP_size_r = [10,15,20]
+    dCSP_threshold_r = [250]#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
     ######################################################################################################
     ######################################################################################################
     ######################################################################################################
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     for jobid in range(tick):
         try:
             sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
-                                     fIP_method_r, fIP_size_r, dCSP_threshold_r, tick, cleanup = True, **params)
+                                     fIP_method_r, fIP_size_r, dCSP_threshold_r, tick, cleanup = False, **params)
         except Exception as e:
             print("Jobid {}, Error given {}".format(jobid, e))
 
