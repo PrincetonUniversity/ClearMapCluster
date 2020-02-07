@@ -3,8 +3,8 @@
 #SBATCH -p all                # partition (queue)
 #SBATCH -c 5                 # number of cores
 #SBATCH -t 700                 # time (minutes)
-#SBATCH -o logs/step5_%a.out        # STDOUT
-#SBATCH -e logs/step5_%a.err        # STDERR
+#SBATCH -o logs/step5.out        # STDOUT
+#SBATCH -e logs/step5.err        # STDERR
 #SBATCH --contiguous #used to try and get cpu mem to be contigous
 
 
