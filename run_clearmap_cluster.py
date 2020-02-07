@@ -23,8 +23,8 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/201907_ymaze_cfos/190917_tpham_cruslat_062719_an20_1d3x_488_008na_1hfds_z10um_100msec_12-46-16"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/201907_ymaze_cfos/190917_tpham_cruslat_062719_an20_1d3x_647_008na_1hfds_z10um_500msec_12-28-33"): [["cellch", "00"]]}
+os.path.join(systemdirectory, "LightSheetTransfer/Jess/202001_cno_cfos/200110_jvcnocfostest_20191101_an5_cno_1_3x_488_008na_1hfds_z10um_100msec_16-28-29"): [["regch", "00"]],
+os.path.join(systemdirectory, "LightSheetTransfer/Jess/202001_cno_cfos/200110_jvcnocfostest_20191101_an5_cno_1_3x_647_008na_1hfds_z10um_250msec_16-18-21"): [["cellch", "00"]]}
 
 ####Required inputs
 
@@ -34,7 +34,7 @@ os.path.join(systemdirectory, "LightSheetTransfer/Jess/201907_ymaze_cfos/190917_
 
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/201908_tpham_ymaze_cfos/processed/an20"),
+"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/202002_cfos/processed/an5_cno"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
@@ -46,13 +46,13 @@ params={
 "rawdata" : True, # set to true if raw data is taken from scope and images need to be flattened; functionality for rawdata =False has not been tested**
 "FinalOrientation": (3, 2, 1), #Orientation: 1,2,3 means the same orientation as the reference and atlas files; #Flip axis with - sign (eg. (-1,2,3) flips x). 3D Rotate by swapping numbers. (eg. (2,1,3) swaps x and y); USE (3,2,1) for DVhorizotnal to sagittal. NOTE (TP): -3 seems to mess up the function and cannot seem to figure out why. do not use.
 "slurmjobfactor": 50, #number of array iterations per arrayjob since max job array on SPOCK is 1000
-"removeBackgroundParameter_size": (7, 7), #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
+"removeBackgroundParameter_size": (5,5), #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
 "findExtendedMaximaParameter_hmax": None, # (float or None)     h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
-"findExtendedMaximaParameter_size": 20, # size in pixels (x,y) for the structure element of the morphological opening
+"findExtendedMaximaParameter_size": 0, # size in pixels (x,y) for the structure element of the morphological opening
 "findExtendedMaximaParameter_threshold": None, # (float or None)     include only maxima larger than a threshold, if None keep all local maxima
 "findIntensityParameter_method": "Max", # (str, func, None)   method to use to determine intensity (e.g. "Max" or "Mean") if None take intensities at the given pixels
-"findIntensityParameter_size": (4,4,4), # (tuple)             size of the search box on which to perform the *method*
-"detectCellShapeParameter_threshold": 450 # (float or None)      threshold to determine mask. Pixels below this are background if None no mask is generated
+"findIntensityParameter_size": (5,5,5), # (tuple)             size of the search box on which to perform the *method*
+"detectCellShapeParameter_threshold": 250# (float or None)      threshold to determine mask. Pixels below this are background if None no mask is generated
 }
 #####################################################################################################################################################
 ##################################################optional arguments for params######################################################################
@@ -94,7 +94,9 @@ if __name__ == "__main__":
         ###make parameter dictionary and pickle file:
         updateparams(os.getcwd(), **params) # e.g. single job assuming directory_determiner function has been properly set
         #copy folder into output for records
-        if not os.path.exists(os.path.join(params["outputdirectory"], "ClearMapCluster")): shutil.copytree(os.getcwd(), os.path.join(params["outputdirectory"], "clearmap_cluster"), ignore=shutil.ignore_patterns("^.git")) #copy run folder into output to save run inf
+        if not os.path.exists(os.path.join(params["outputdirectory"], "ClearMapCluster")): 
+            shutil.copytree(os.getcwd(), os.path.join(params["outputdirectory"], "ClearMapCluster"), 
+                            ignore=shutil.ignore_patterns("^.git")) #copy run folder into output to save run inf
 
     #######################STEP 1 #######################
     #####################################################

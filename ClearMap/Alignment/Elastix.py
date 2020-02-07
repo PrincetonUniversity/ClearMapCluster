@@ -472,7 +472,7 @@ def alignData(fixedImage, movingImage, affineParameterFile, bSplineParameterFile
         #cmd = ElastixBinary + ' -threads 16 -m ' + movingImage + ' -f ' + fixedImage + ' -p ' + bSplineParameterFile + ' -out ' + resultDirectory;
         sp.call(['elastix', '-m', movingImage, '-f', fixedImage + '-p', bSplineParameterFile, '-out', resultDirectory]);
     else:
-        print ['elastix', '-m', movingImage, '-f', fixedImage, '-p', affineParameterFile, '-p', bSplineParameterFile, '-out', resultDirectory]
+        print(['elastix', '-m', movingImage, '-f', fixedImage, '-p', affineParameterFile, '-p', bSplineParameterFile, '-out', resultDirectory])
         #cmd = ElastixBinary + ' -threads 16 -m ' + movingImage + ' -f ' + fixedImage + ' -p ' + affineParameterFile[0] + ' -p ' + bSplineParameterFile[0] + ' -out ' + resultDirectory;
         sp.call(['elastix', '-m', movingImage, '-f', fixedImage, '-p', affineParameterFile, '-p', bSplineParameterFile, '-out', resultDirectory])
         #$ELASTIX -threads 16 -m $MOVINGIMAGE -f $FIXEDIMAGE -fMask $FIXEDIMAGE_MASK -p  $AFFINEPARFILE -p $BSPLINEPARFILE -out $ELASTIX_OUTPUT_DIR
