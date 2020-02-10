@@ -3,7 +3,7 @@
 T. Pisano's parallelization to a cluster of C. Kirst's ClearMap software (https://idisco.info/clearmap-2/) for use on a cluster using a slurm based scheduler. Written for Python 3.7+. Installation instructions at bottom of this read me. Modifications by Zahra M. 
 
 ## *Descriptions of files*:
-For the most part ClearMap was not touched. Changes include, but not limited to:
+Changes to ClearMap include, but not limited to:
 
 * `sub_clearmap_cluster.sh`:
 	* .sh file to be used to submit to a slurm scheduler
@@ -39,14 +39,19 @@ celldetection_operations(jobid, testing = True, **params)
 
 
 ## *INSTALLATION INSTRUCTIONS*:
+* Note that this currently has only been tested on linux (Ubuntu 16 and 18). 
 * Things you will need to do beforehand:
 	* Elastix needs to be compiled on the cluster - this was challenging for IT here and suspect it will be for your IT as well.
-	* After downloading this package onto your data server (where the cluster has access to it), you will need to install the 'normal' version of ClearMap (from my packages folder: 'ClearMapCluster') and it's dependencies on the cluster:
 
 ### Create a python Environment (Install anaconda if not already):
 ```
-$ pip install SimpleITK xvfbwrapper cython opencv-python tifffile scipy scikit-image natsort h5py joblib
+$ pip install SimpleITK xvfbwrapper cython opencv-python tifffile scipy scikit-image natsort h5py joblib xvfbwrapper
+```
+
+### If on local linux machine:
+```
 $ sudo apt-get install elastix
+$ sudo apt-get install xvfb
 ```
 
 ### Edit: ClearMapCluster/sub_clearmap_cluster.sh file:
@@ -89,11 +94,5 @@ if not os.path.exists(os.path.join(params['outputdirectory'], 'clearmap_cluster'
 	shutil.copytree(os.getcwd(), os.path.join(params['outputdirectory'], 'clearmap_cluster'))
 ```
 
-* For testing of clearmap cell detection use:
-
-```
-from ClearMap.cluster.par_tools import celldetection_operations
-celldetection_operations(jobid, testing = True, **params)
-```
-* then using the cluster's headnode (in the new folder's clearmap directory generated from the previous step) submit the batch job: `sbatch sub_clearmap_cluster.sh`
+* For testing of clearmap cell detection, use `parameter_sweep.ipynb`
 

@@ -154,12 +154,7 @@ if __name__ == "__main__":
     
     makedir(params["outputdirectory"])
 
-    #get job id from SLURM
-#    print sys.argv
-#    print os.environ["SLURM_ARRAY_TASK_ID"]
-#    jobid = int(os.environ["SLURM_ARRAY_TASK_ID"]) #int(sys.argv[2])
-#    stepid = int(sys.argv[1])
-###make parameter dictionary and pickle file:
+    ###make parameter dictionary and pickle file:
     updateparams(os.getcwd(), **params) # e.g. single job assuming directory_determiner function has been properly set
     #copy folder into output for records
     if not os.path.exists(os.path.join(params["outputdirectory"], "ClearMapCluster")): shutil.copytree(os.getcwd(), os.path.join(params["outputdirectory"], "clearmap_cluster"), ignore=shutil.ignore_patterns("^.git")) #copy run folder into output to save run info
@@ -173,9 +168,9 @@ if __name__ == "__main__":
     ######################################################################################################
     #NOTE: To adjust parameter sweep, modify ranges below
     ######################################################################################################
-    rBP_size_r = [5] ###evens seem to not be good
-    fEMP_hmax_r = [None]#[None, 5, 10, 20, 40]
-    fEMP_size_r = [0]
+    rBP_size_r = [5] ###evens seem to not be good  #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
+    fEMP_hmax_r = [None]# (float or None) h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
+    fEMP_size_r = [0] # size in pixels (x,y) for the structure element of the morphological opening
     fEMP_threshold_r = [None] #range(0,10)
     fIP_method_r = ["Max"] #["Max, "Mean"]
     fIP_size_r = [10,15,20]

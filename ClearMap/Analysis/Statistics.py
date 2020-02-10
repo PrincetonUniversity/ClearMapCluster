@@ -177,8 +177,6 @@ def var(group, **args):
     return g.var(axis = 0);    
     
 
-
-
     
 def thresholdPoints(points, intensities, threshold = 0, row = 0):
     """Threshold points by intensities"""
@@ -336,17 +334,6 @@ def testCompletedCumulatives(data, method = 'AndersonDarling', offset = None, pl
         (s,a,p) = stats.anderson_ksamp(datac);
 
     return (p,s);
-
-
-
-
-
-
-
-
-
-
-
 
 def testCompletedInvertedCumulatives(data, method = 'AndersonDarling', offset = None, plot = False):
     """Test if data sets have the same number / intensity distribution by adding zero intensity counts to the smaller sized data sets and performing a distribution comparison test on the reversed cumulative distribution"""
