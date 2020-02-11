@@ -100,7 +100,6 @@ def celldetection_operations(jobid, testing = False, **params):
         substack["source"]
         for xx in range(substack["zCenterIndices"][0], substack["zCenterIndices"][1]):    
             fl = substack["source"].replace(str("\\d{4}"), str(xx).zfill(4))
-            #tifffile.imsave(os.path.join(rawfld, fl[fl.rfind("/")+1:]) ,tifffile.imread(fl))
             shutil.copy2(fl, rawfld)
 
     return

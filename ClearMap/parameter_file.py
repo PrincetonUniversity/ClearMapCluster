@@ -5,52 +5,39 @@ Example script to set up the parameters for the image processing pipeline
 
 ######################### Import modules
 
-import os, numpy, math, sys
-import pickle, numpy as np
+import os, sys, pickle
 
-import ClearMap.Settings as settings
-import ClearMap.IO as io
-
-from ClearMap.Alignment.Resampling import resampleData;
-from ClearMap.Alignment.Elastix import alignData, transformPoints
-from ClearMap.ImageProcessing.CellDetection import detectCells
-from ClearMap.Alignment.Resampling import resamplePoints, resamplePointsInverse
-from ClearMap.Analysis.Label import countPointsInRegions
-from ClearMap.Analysis.Voxelization import voxelize
-from ClearMap.Analysis.Statistics import thresholdPoints
 from ClearMap.Utils.ParameterTools import joinParameter
-from ClearMap.Analysis.Label import labelToName
-from ClearMap.cluster.preprocessing import pth_update, listdirfull, makedir, writer
-from ClearMap.cluster.directorydeterminer import directorydeterminer
+from ClearMap.cluster.preprocessing import pth_update, listdirfull, makedir
 
 
 def set_parameters_for_clearmap(testing=False, **kwargs):
-    '''TP: Wrapped this into a function such that parallel processes can get at variables
+    """TP: Wrapped this into a function such that parallel processes can get at variables
     
     testing should be set to false unless testing where it will save optimization files for cell detection.
     
     Editting of this function is how one changes cell detection parameters
-    '''
+    """
     
     #handle optional inputs, to change a parameter for your application, see run_clearmap_cluster.py. This is done before loading kwargs to ensure no overwrite during parameter sweep and/or cell detection testing
-    rBP_size = kwargs['removeBackgroundParameter_size'] if 'removeBackgroundParameter_size' in kwargs else (7,7)
-    fEMP_hmax = kwargs['findExtendedMaximaParameter_hmax'] if 'findExtendedMaximaParameter_hmax' in kwargs else None # (float or None)     h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
-    fEMP_size = kwargs['findExtendedMaximaParameter_size'] if 'findExtendedMaximaParameter_size' in kwargs else 5 # size in pixels (x,y) for the structure element of the morphological opening
-    fEMP_threshold = kwargs['findExtendedMaximaParameter_threshold'] if 'findExtendedMaximaParameter_threshold' in kwargs else 0 # (float or None)     include only maxima larger than a threshold, if None keep all local maxima
-    fIP_method = kwargs['findIntensityParameter_method'] if 'findIntensityParameter_method' in kwargs else 'Max' ## (str, func, None)   method to use to determine intensity (e.g. "Max" or "Mean") if None take intensities at the given pixels
-    fIP_size = kwargs['findIntensityParameter_size'] if 'findIntensityParameter_size' in kwargs else (3,3,3) # (tuple)             size of the search box on which to perform the *method*
-    dCSHP_threshold = kwargs['detectCellShapeParameter_threshold'] if 'detectCellShapeParameter_threshold' in kwargs else 500 ## (float or None)      threshold to determine mask. Pixels below this are background if None no mask is generated
+    rBP_size = kwargs["removeBackgroundParameter_size"] if "removeBackgroundParameter_size" in kwargs else (7,7)
+    fEMP_hmax = kwargs["findExtendedMaximaParameter_hmax"] if "findExtendedMaximaParameter_hmax" in kwargs else None # (float or None)     h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
+    fEMP_size = kwargs["findExtendedMaximaParameter_size"] if "findExtendedMaximaParameter_size" in kwargs else 5 # size in pixels (x,y) for the structure element of the morphological opening
+    fEMP_threshold = kwargs["findExtendedMaximaParameter_threshold"] if "findExtendedMaximaParameter_threshold" in kwargs else 0 # (float or None)     include only maxima larger than a threshold, if None keep all local maxima
+    fIP_method = kwargs["findIntensityParameter_method"] if "findIntensityParameter_method" in kwargs else "Max" ## (str, func, None)   method to use to determine intensity (e.g. "Max" or "Mean") if None take intensities at the given pixels
+    fIP_size = kwargs["findIntensityParameter_size"] if "findIntensityParameter_size" in kwargs else (3,3,3) # (tuple)             size of the search box on which to perform the *method*
+    dCSHP_threshold = kwargs["detectCellShapeParameter_threshold"] if "detectCellShapeParameter_threshold" in kwargs else 500 ## (float or None)      threshold to determine mask. Pixels below this are background if None no mask is generated
     
     
     ##input data from preprocessing:
-    with open(os.path.join(kwargs['outputdirectory'], 'param_dict.p'), 'rb') as pckl:
+    with open(os.path.join(kwargs["outputdirectory"], "param_dict.p"), "rb") as pckl:
             kwargs.update(pickle.load(pckl))
             pckl.close()
     kwargs = pth_update(kwargs)
     
-    vols=kwargs['volumes']
-    cfosvol = [xx for xx in vols if 'cellch' in xx.ch_type][0]
-    autovol = [xx for xx in vols if 'regch' in xx.ch_type][0]
+    vols=kwargs["volumes"]
+    cfosvol = [xx for xx in vols if "cellch" in xx.ch_type][0]
+    autovol = [xx for xx in vols if "regch" in xx.ch_type][0]
     
     
 
@@ -59,18 +46,13 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     #Data File and Reference channel File, usually as a sequence of files from the microscope
     #Use \d{4} for 4 digits in the sequence for instance. As an example, if you have cfos-Z0001.ome.tif :
     #os.path.join() is used to join the savedirectory path and the data paths:
-    if kwargs['resample']:
-        cFosFile = os.path.join(cfosvol.full_sizedatafld_vol+'_resized', cfosvol.brainname + "_C" + cfosvol.channel + "_Z\d{4}.tif")
-        AutofluoFile = os.path.join(autovol.full_sizedatafld_vol+'_resized', autovol.brainname + "_C" + autovol.channel + "_Z\d{4}.tif")
-        OriginalResolution = tuple([xx for xx in [round(np.float32(xx / kwargs['resample']), 4) for xx in kwargs['xyz_scale'][0:2]]]) + tuple([kwargs['xyz_scale'][-1]])
-    else:
-        cFosFile = os.path.join(cfosvol.full_sizedatafld_vol, cfosvol.brainname + "_C" + cfosvol.channel + "_Z\d{4}.tif")
-        AutofluoFile = os.path.join(autovol.full_sizedatafld_vol, autovol.brainname + "_C" + autovol.channel + "_Z\d{4}.tif")
-        OriginalResolution = kwargs['xyz_scale']
+    cFosFile = os.path.join(cfosvol.full_sizedatafld_vol, cfosvol.brainname + "_C" + cfosvol.channel + "_Z\d{4}.tif")
+    AutofluoFile = os.path.join(autovol.full_sizedatafld_vol, autovol.brainname + "_C" + autovol.channel + "_Z\d{4}.tif")
+    OriginalResolution = kwargs["xyz_scale"]
     
    
-    #Specify the range for the cell detection. This doesn't affect the resampling and registration operations
-    cFosFileRange = {'x' : all, 'y' : all, 'z' : all};
+    #Specify the range for the cell detection. This doesn"t affect the resampling and registration operations
+    cFosFileRange = {"x" : all, "y" : all, "z" : all};
     
     #Resolution of the Raw Data (in um / pixel)
     #OriginalResolution = (4.0625, 4.0625, 3);
@@ -79,14 +61,14 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     #Orientation: 1,2,3 means the same orientation as the reference and atlas files.
     #Flip axis with - sign (eg. (-1,2,3) flips x). 3D Rotate by swapping numbers. (eg. (2,1,3) swaps x and y)
     #FinalOrientation = (1,2,3);
-    FinalOrientation = kwargs['FinalOrientation']
+    FinalOrientation = kwargs["FinalOrientation"] if "FinalOrientation" in kwargs else (3,2,1)
     
     #Resolution of the Atlas (in um/ pixel)
-    AtlasResolution = kwargs['AtlasResolution'] if 'AtlasResolution' in kwargs else (25, 25, 25)
+    AtlasResolution = kwargs["AtlasResolution"] if "AtlasResolution" in kwargs else (25, 25, 25)
     
     #Path to registration parameters and atlases
-    AtlasFile      = kwargs['AtlasFile']
-    AnnotationFile = kwargs['annotationfile']
+    AtlasFile      = kwargs["AtlasFile"] if "AtlasFile" in kwargs else "/jukebox/LightSheetTransfer/atlas/sagittal_atlas_20um_iso.tif"
+    AnnotationFile = kwargs["annotationfile"] if "annotationfile" in kwargs else "/jukebox/LightSheetTransfer/atlas/annotation_sagittal_atlas_20um_iso.tif"
     
     ######################### Cell Detection Parameters using custom filters
     
@@ -96,16 +78,16 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     
     #testing output:
     if testing:
-        optdir = os.path.join(kwargs['outputdirectory'], 'optimization'); makedir(optdir)
-        sys.stdout.write('\nThis function is set for optimization of cell detection, optimization results in:\n   {}\n\n'.format(optdir));sys.stdout.flush()
-        bgdir = os.path.join(optdir, 'background'); makedir(bgdir)
-        bg = os.path.join(bgdir, 'background\d{4}.ome.tif')
-        exmaxdir = os.path.join(optdir, 'extendmax'); makedir(exmaxdir)
-        ex = os.path.join(exmaxdir, 'extendmax\d{4}.ome.tif')
-        celldir = os.path.join(optdir, 'cell'); makedir(celldir)
-        cell = os.path.join(celldir, 'cell\d{4}.ome.tif')
-        illumdir = os.path.join(optdir, 'illuminationcorrection_likelythisisoff'); makedir(illumdir)
-        illum = os.path.join(illumdir, 'illum\d{4}.ome.tif')
+        optdir = os.path.join(kwargs["outputdirectory"], "optimization"); makedir(optdir)
+        sys.stdout.write("\nThis function is set for optimization of cell detection, optimization results in:\n   {}\n\n".format(optdir));sys.stdout.flush()
+        bgdir = os.path.join(optdir, "background"); makedir(bgdir)
+        bg = os.path.join(bgdir, "background\d{4}.ome.tif")
+        exmaxdir = os.path.join(optdir, "extendmax"); makedir(exmaxdir)
+        ex = os.path.join(exmaxdir, "extendmax\d{4}.ome.tif")
+        celldir = os.path.join(optdir, "cell"); makedir(celldir)
+        cell = os.path.join(celldir, "cell\d{4}.ome.tif")
+        illum =  os.path.join(optdir, "illumination_correction")
+
 
     else:
         bg = None
@@ -118,7 +100,7 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     correctIlluminationParameter = {
         "flatfield"  : None,  # (True or None)  flat field intensities, if None do not correct image for illumination 
         "background" : None, # (None or array) background image as file name or array, if None background is assumed to be zero
-        "scaling"    : None, # was 'Mean' (str or None)        scale the corrected result by this factor, if 'max'/'mean' scale to keep max/mean invariant
+        "scaling"    : None, # was "Mean" (str or None)        scale the corrected result by this factor, if "max"/"mean" scale to keep max/mean invariant
         "save"       : illum,       # (str or None)        save the corrected image to file
         "verbose"    : True    # (bool or int)        print / plot information about this step 
     }
@@ -166,7 +148,7 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     #####
     
     ###########
-    ###Nico's parameters in paper w 4.0625:
+    ###Nico"s parameters in paper w 4.0625:
     #background 7
     #threhold cell detection intensity of 700
     #cells within size o f20 to 500 voxels
@@ -186,24 +168,28 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     
     
     #set directories
-    savedirectory = os.path.join(kwargs['outputdirectory'], 'clearmap_cluster_output')
-    makedir(savedirectory)
-    elastixdirectory = os.path.join(kwargs['parameterfolder'])
+    if not testing:
+        savedirectory = os.path.join(kwargs["outputdirectory"], "clearmap_cluster_output")
+        makedir(savedirectory)
+        elastixdirectory = os.path.join(kwargs["parameterfolder"])
+    else: 
+        savedirectory = kwargs["outputdirectory"]
+        elastixdirectory = os.path.join(kwargs["parameterfolder"])
     
     
     #################### Heat map generation
     
     ##Voxelization: file name for the output:
-    VoxelizationFile = os.path.join(savedirectory, 'points_voxelized.tif');
+    VoxelizationFile = os.path.join(savedirectory, "points_voxelized.tif");
     
     # Parameter to calculate the density of the voxelization
     voxelizeParameter = {
         #Method to voxelize
-        "method" : 'Spherical', # Spherical,'Rectangular, Gaussian'
+        "method" : "Spherical", # Spherical,"Rectangular, Gaussian"
            
         # Define bounds of the volume to be voxelized in pixels
         "size" : (15,15,15),  
-        #shouldn't need to change as this is now at the level of the isotropic atlas
+        #shouldn"t need to change as this is now at the level of the isotropic atlas
         #"size" : (15 * deltaresolution,15 * deltaresolution,15 * deltaresolution),
     
         # Voxelization weigths (e/g intensities)
@@ -238,7 +224,7 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
         #increase chunk size for optimization (True, False or all = automatic)
         "chunkOptimizationSize" : all,
        
-        "processMethod" : "cluster" #'sequential', 'parallel'=local parallelization, 'cluster' = parellization using cluster
+        "processMethod" : "cluster" #"sequential", "parallel"=local parallelization, "cluster" = parellization using cluster
        };
     
     
@@ -246,18 +232,18 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     
     
     
-    ######################## Run Parameters, usually you don't need to change those
+    ######################## Run Parameters, usually you don"t need to change those
     
     
     ### Resample Fluorescent and CFos images
     # Autofluorescent cFos resampling for aquisition correction
     
-    ResolutionAffineCFosAutoFluo = kwargs['ResolutionAffineCFosAutoFluo'] if 'ResolutionAffineCFosAutoFluo' in kwargs else (16, 16, 16)
+    ResolutionAffineCFosAutoFluo = kwargs["ResolutionAffineCFosAutoFluo"] if "ResolutionAffineCFosAutoFluo" in kwargs else (16, 16, 16)
     
     CorrectionResamplingParameterCfos = ResamplingParameter.copy();
     
     CorrectionResamplingParameterCfos["source"] = cFosFile;
-    CorrectionResamplingParameterCfos["sink"]   = os.path.join(savedirectory, 'cfos_resampled.tif');
+    CorrectionResamplingParameterCfos["sink"]   = os.path.join(savedirectory, "cfos_resampled.tif");
         
     CorrectionResamplingParameterCfos["resolutionSource"] = OriginalResolution;
     CorrectionResamplingParameterCfos["resolutionSink"]   = ResolutionAffineCFosAutoFluo;
@@ -269,30 +255,30 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     #Files for Auto-fluorescence for acquisition movements correction
     CorrectionResamplingParameterAutoFluo = CorrectionResamplingParameterCfos.copy();
     CorrectionResamplingParameterAutoFluo["source"] = AutofluoFile;
-    CorrectionResamplingParameterAutoFluo["sink"]   = os.path.join(savedirectory, 'autofluo_for_cfos_resampled.tif');
+    CorrectionResamplingParameterAutoFluo["sink"]   = os.path.join(savedirectory, "autofluo_for_cfos_resampled.tif");
        
     #Files for Auto-fluorescence (Atlas Registration)
     RegistrationResamplingParameter = CorrectionResamplingParameterAutoFluo.copy();
-    RegistrationResamplingParameter["sink"]            =  os.path.join(savedirectory, 'autofluo_resampled.tif');
+    RegistrationResamplingParameter["sink"]            =  os.path.join(savedirectory, "autofluo_resampled.tif");
     RegistrationResamplingParameter["resolutionSink"]  = AtlasResolution;
        
     
     ### Align cFos and Autofluo
-    affinepth = [xx for xx in listdirfull(elastixdirectory) if 'affine' in xx and '~' not in xx][0]
-    bsplinepth = [xx for xx in listdirfull(elastixdirectory) if 'bspline' in xx and '~' not in xx][0]
+    affinepth = [xx for xx in listdirfull(elastixdirectory) if "affine" in xx and "~" not in xx][0]
+    bsplinepth = [xx for xx in listdirfull(elastixdirectory) if "bspline" in xx and "~" not in xx][0]
     
     
     CorrectionAlignmentParameter = {            
         #moving and reference images
-        "movingImage" : os.path.join(savedirectory, 'autofluo_for_cfos_resampled.tif'),
-        "fixedImage"  : os.path.join(savedirectory, 'cfos_resampled.tif'),
+        "movingImage" : os.path.join(savedirectory, "autofluo_for_cfos_resampled.tif"),
+        "fixedImage"  : os.path.join(savedirectory, "cfos_resampled.tif"),
         
         #elastix parameter files for alignment
         "affineParameterFile"  : affinepth,
         "bSplineParameterFile" : bsplinepth,
         
         #directory of the alignment result
-        "resultDirectory" :  os.path.join(savedirectory, 'elastix_cfos_to_auto')
+        "resultDirectory" :  os.path.join(savedirectory, "elastix_cfos_to_auto")
         }; 
       
     
@@ -301,11 +287,11 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     #directory of the alignment result
     RegistrationAlignmentParameter = CorrectionAlignmentParameter.copy();
     
-    RegistrationAlignmentParameter["resultDirectory"] = os.path.join(savedirectory, 'elastix_auto_to_atlas');
+    RegistrationAlignmentParameter["resultDirectory"] = os.path.join(savedirectory, "elastix_auto_to_atlas");
         
     #moving and reference images
     RegistrationAlignmentParameter["movingImage"]  = AtlasFile;
-    RegistrationAlignmentParameter["fixedImage"]   = os.path.join(savedirectory, 'autofluo_resampled.tif');
+    RegistrationAlignmentParameter["fixedImage"]   = os.path.join(savedirectory, "autofluo_resampled.tif");
     
     #elastix parameter files for alignment
     RegistrationAlignmentParameter["affineParameterFile"] = affinepth
@@ -316,16 +302,16 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     # result files for cell coordinates (csv, vtk or ims)
     SpotDetectionParameter = {
         "source" : cFosFile,
-        "sink"   : (os.path.join(savedirectory, 'cells-allpoints.npy'),  os.path.join(savedirectory,  'intensities-allpoints.npy')),
+        "sink"   : (os.path.join(savedirectory, "cells-allpoints.npy"),  os.path.join(savedirectory,  "intensities-allpoints.npy")),
         "detectSpotsParameter" : detectSpotsParameter
     };
     SpotDetectionParameter = joinParameter(SpotDetectionParameter, cFosFileRange)
     
     ImageProcessingParameter = joinParameter(StackProcessingParameter, SpotDetectionParameter);
     
-    FilteredCellsFile = (os.path.join(savedirectory, 'cells.npy'), os.path.join(savedirectory,  'intensities.npy'));
+    FilteredCellsFile = (os.path.join(savedirectory, "cells.npy"), os.path.join(savedirectory,  "intensities.npy"));
     
-    TransformedCellsFile = os.path.join(savedirectory, 'cells_transformed_to_Atlas.npy')
+    TransformedCellsFile = os.path.join(savedirectory, "cells_transformed_to_Atlas.npy")
     
     ### Transform points from Original c-Fos position to autofluorescence
     
@@ -333,7 +319,7 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     # downscale points to referenece image size
     
     CorrectionResamplingPointsParameter = CorrectionResamplingParameterCfos.copy();
-    CorrectionResamplingPointsParameter["pointSource"] = os.path.join(savedirectory, 'cells.npy');
+    CorrectionResamplingPointsParameter["pointSource"] = os.path.join(savedirectory, "cells.npy");
     CorrectionResamplingPointsParameter["dataSizeSource"] = cFosFile;
     CorrectionResamplingPointsParameter["pointSink"]  = None;
     
@@ -349,28 +335,28 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     
     ##TP
     bigdct={}
-    bigdct['detectSpotsParameter'] = detectSpotsParameter
-    bigdct['voxelizeParameter'] = voxelizeParameter
-    bigdct['ResamplingParameter'] = ResamplingParameter
-    bigdct['StackProcessingParameter'] = StackProcessingParameter
-    bigdct['CorrectionResamplingParameterCfos'] = CorrectionResamplingParameterCfos
-    bigdct['CorrectionResamplingParameterAutoFluo'] = CorrectionResamplingParameterAutoFluo
-    bigdct['RegistrationResamplingParameter'] = RegistrationResamplingParameter
-    bigdct['CorrectionAlignmentParameter'] = CorrectionAlignmentParameter
-    bigdct['RegistrationAlignmentParameter']= RegistrationAlignmentParameter
-    bigdct['SpotDetectionParameter'] = SpotDetectionParameter
-    bigdct['ImageProcessingParameter'] = ImageProcessingParameter
-    bigdct['FilteredCellsFile'] = FilteredCellsFile
-    bigdct['TransformedCellsFile'] = TransformedCellsFile
-    bigdct['CorrectionResamplingPointsParameter'] = CorrectionResamplingPointsParameter
-    bigdct['CorrectionResamplingPointsInverseParameter'] = CorrectionResamplingPointsInverseParameter
-    bigdct['RegistrationResamplingPointParameter'] = RegistrationResamplingPointParameter
-    bigdct['AnnotationFile'] = AnnotationFile
-    bigdct['VoxelizationFile'] = VoxelizationFile
-    bigdct['ImageProcessingMethod'] = ImageProcessingMethod
-    bigdct['AtlasFile'] = AtlasFile
-    bigdct['OutputDirectory'] = kwargs['outputdirectory']
-    if testing: bigdct['OptimizationLocation'] = optdir
+    bigdct["detectSpotsParameter"] = detectSpotsParameter
+    bigdct["voxelizeParameter"] = voxelizeParameter
+    bigdct["ResamplingParameter"] = ResamplingParameter
+    bigdct["StackProcessingParameter"] = StackProcessingParameter
+    bigdct["CorrectionResamplingParameterCfos"] = CorrectionResamplingParameterCfos
+    bigdct["CorrectionResamplingParameterAutoFluo"] = CorrectionResamplingParameterAutoFluo
+    bigdct["RegistrationResamplingParameter"] = RegistrationResamplingParameter
+    bigdct["CorrectionAlignmentParameter"] = CorrectionAlignmentParameter
+    bigdct["RegistrationAlignmentParameter"]= RegistrationAlignmentParameter
+    bigdct["SpotDetectionParameter"] = SpotDetectionParameter
+    bigdct["ImageProcessingParameter"] = ImageProcessingParameter
+    bigdct["FilteredCellsFile"] = FilteredCellsFile
+    bigdct["TransformedCellsFile"] = TransformedCellsFile
+    bigdct["CorrectionResamplingPointsParameter"] = CorrectionResamplingPointsParameter
+    bigdct["CorrectionResamplingPointsInverseParameter"] = CorrectionResamplingPointsInverseParameter
+    bigdct["RegistrationResamplingPointParameter"] = RegistrationResamplingPointParameter
+    bigdct["AnnotationFile"] = AnnotationFile
+    bigdct["VoxelizationFile"] = VoxelizationFile
+    bigdct["ImageProcessingMethod"] = ImageProcessingMethod
+    bigdct["AtlasFile"] = AtlasFile
+    bigdct["OutputDirectory"] = kwargs["outputdirectory"]
+    if testing: bigdct["OptimizationLocation"] = optdir
     #bigdct[] = 
     #bigdct[] = 
     
