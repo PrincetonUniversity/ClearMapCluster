@@ -232,12 +232,10 @@ def updateparams(cwd, svnm=False, **kwargs):
             vol.add_regex(regex)
             vol.add_tiling_overlap(kwargs['tiling_overlap'])
             vol.add_xyz_scale(kwargs['xyz_scale'])
+            kwargs['AtlasFile'] = kwargs['AtlasFile'] if "AtlasFile" in list(kwargs.keys()) else "/jukebox/LightSheetTransfer/atlas/sagittal_atlas_20um_iso.tif"
             vol.add_atlasfile(kwargs['AtlasFile'])
-            try:
-                vol.add_parameterfolder(kwargs['parameterfolder'])
-            except KeyError:
-                kwargs['parameterfolder']=os.path.join(packagedirectory, 'parameterfolder')
-                vol.add_parameterfolder(kwargs['parameterfolder'])
+            kwargs['parameterfolder'] = os.path.join(packagedirectory, 'parameterfolder')
+            vol.add_parameterfolder(kwargs['parameterfolder'])
             makedir(vol.full_sizedatafld)
                 ############# check to see if data is raw or preprocessed from imspector #############
             vol.add_fullsizedimensions(tmpdct['fullsizedimensions'])
@@ -382,11 +380,7 @@ def process_planes(job, cores, compression, **kwargs):
         #####################save all channels so they can be eventually combined and compressed for backup############################
         vol.update_plns(saver(cores, stitchdct, vol.full_sizedatafld, vol.brainname, zpln, compression)[0])
         vols.append(vol)
-        #optional resample
-        if kwargs['resample']: 
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    resize_save(cores, stitchdct, vol.full_sizedatafld, kwargs['resample'], vol.brainname, zpln, compression)
+
     writer(vol.full_sizedatafld, 'Processed zpln {}\n'.format(zpln), flnm='process.txt')
     del zpln, dct, stitchdct, vols
     return
