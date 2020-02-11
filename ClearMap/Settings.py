@@ -35,6 +35,8 @@ elif socket.gethostname() == 'PNI-1867vwtq2' and directorydeterminer() == '/juke
     ElastixPath = '/usr'
 elif directorydeterminer() == '/jukebox/' and socket.gethostname() != 'PNI-1867vwtq2': #spock
     ElastixPath = '/jukebox/pkgs/ELASTIX/4.8'
+else:
+    ElastixPath = '/usr'
 
 """str: Absolue path to the elastix installation
 

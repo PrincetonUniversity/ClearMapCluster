@@ -163,7 +163,6 @@ if __name__ == "__main__":
     for stepid in range(0, 20):
         arrayjob(stepid, cores=5, compression=1, **params)
 
-#%%
         
     ######################################################################################################
     #NOTE: To adjust parameter sweep, modify ranges below
