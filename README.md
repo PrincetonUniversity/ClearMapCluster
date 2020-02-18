@@ -2,6 +2,23 @@
 
 T. Pisano's parallelization to a cluster of C. Kirst's ClearMap software (https://idisco.info/clearmap-2/) for use on a cluster using a slurm based scheduler. Written for Python 3.7+. Installation instructions at bottom of this read me. Modifications by Zahra M. 
 
+
+## *INSTALLATION INSTRUCTIONS*:
+* Note that this currently has only been tested on linux (Ubuntu 16 and 18). 
+* Things you will need to do beforehand:
+	* Elastix needs to be compiled on the cluster - this was challenging for IT here and suspect it will be for your IT as well.
+
+### Create a python Environment (Install anaconda if not already):
+```
+$ pip install SimpleITK cython opencv-python tifffile scipy scikit-image natsort h5py joblib xvfbwrapper
+```
+
+### If on local linux machine:
+```
+$ sudo apt-get install elastix
+$ sudo apt-get install xvfb
+```
+
 ## *Descriptions of files*:
 Changes to ClearMap include, but not limited to:
 
@@ -36,23 +53,6 @@ celldetection_operations(jobid, testing = True, **params)
   * par_tools: functions made to allow for division of labor of Kirst's ClearMap package
   * ClearMap.cluster.directorydeterminer function to allow for different machines to use the same package
   * utils: misc functions taken from tpisano's lightsheet package to make life easier
-
-
-## *INSTALLATION INSTRUCTIONS*:
-* Note that this currently has only been tested on linux (Ubuntu 16 and 18). 
-* Things you will need to do beforehand:
-	* Elastix needs to be compiled on the cluster - this was challenging for IT here and suspect it will be for your IT as well.
-
-### Create a python Environment (Install anaconda if not already):
-```
-$ pip install SimpleITK xvfbwrapper cython opencv-python tifffile scipy scikit-image natsort h5py joblib xvfbwrapper
-```
-
-### If on local linux machine:
-```
-$ sudo apt-get install elastix
-$ sudo apt-get install xvfb
-```
 
 ### Edit: ClearMapCluster/sub_clearmap_cluster.sh file:
 * Need to load anacondapy [version] on cluster (something like):
