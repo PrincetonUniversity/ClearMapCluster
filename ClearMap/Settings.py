@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Module to set *ClearMap's* internal parameter and paths to external programs.
+Module to set *ClearMap"s* internal parameter and paths to external programs.
 
 Notes:
     Edit the :func:`setup` routine to point to the ilastik and elastix paths 
@@ -27,16 +27,16 @@ Notes:
 """
 
 #path to eastix installation
-if directorydeterminer() == '/home/wanglab/': #ramsees
-    ElastixPath = '/usr'
-elif directorydeterminer() == '/home/tpisano/': 
-    ElastixPath = '/usr'    
-elif socket.gethostname() == 'PNI-1867vwtq2' and directorydeterminer() == '/jukebox/':
-    ElastixPath = '/usr'
-elif directorydeterminer() == '/jukebox/' and socket.gethostname() != 'PNI-1867vwtq2': #spock
-    ElastixPath = '/jukebox/pkgs/ELASTIX/4.8'
+if directorydeterminer() == "/home/wanglab/": #ramsees
+    ElastixPath = "/usr"
+elif directorydeterminer() == "/home/tpisano/": 
+    ElastixPath = "/usr"    
+elif socket.gethostname() == "PNI-1867VWTQ2" and directorydeterminer() == "/jukebox/":
+    ElastixPath = "/usr"
+elif directorydeterminer() == "/jukebox/" and socket.gethostname() != "PNI-1867vwtq2": #spock
+    ElastixPath = "/jukebox/pkgs/ELASTIX/4.8"
 else:
-    ElastixPath = '/usr'
+    ElastixPath = "/usr"
 
 """str: Absolue path to the elastix installation
 
@@ -57,31 +57,31 @@ def setup():
     
     hostname = socket.gethostname();
     
-    if hostname == 'kagalaska.nld':  #Christophs Laptop 
-        IlastikPath = '/home/ckirst/programs/ilastik-1.1.9-Linux';
-        ElastixPath = '/home/ckirst/programs/elastix/';
+    if hostname == "kagalaska.nld":  #Christophs Laptop 
+        IlastikPath = "/home/ckirst/programs/ilastik-1.1.9-Linux";
+        ElastixPath = "/home/ckirst/programs/elastix/";
     
-    elif hostname == 'mtllab-Ubuntu': #MTL workstation
-        IlastikPath = '/usr/local/ilastik-1.1.9-Linux';
-        ElastixPath = '/usr/local/elastix';       
+    elif hostname == "mtllab-Ubuntu": #MTL workstation
+        IlastikPath = "/usr/local/ilastik-1.1.9-Linux";
+        ElastixPath = "/usr/local/elastix";       
     
     ## insert your hostname specific settings here ##
-    #elif hostname == 'your-host-name':
-    #    IlastikPath = 'path-to-ilastik';
-    #    ElastixPath = 'path-to-elastix';   
+    #elif hostname == "your-host-name":
+    #    IlastikPath = "path-to-ilastik";
+    #    ElastixPath = "path-to-elastix";   
     ##
 
     # check existence:
     if not ElastixPath is None:
         if not os.path.exists(ElastixPath):
-            #raise RuntimeWarning('Settings: elastix path %s does not exists, cf. Settings.py or type help(Settings) for details.' % ElastixPath);
-            print('Settings: elastix path %s does not exists, cf. Settings.py or type help(Settings) for details.' % ElastixPath);
+            #raise RuntimeWarning("Settings: elastix path %s does not exists, cf. Settings.py or type help(Settings) for details." % ElastixPath);
+            print("Settings: elastix path %s does not exists, cf. Settings.py or type help(Settings) for details." % ElastixPath);
             ElastixPath = None;
     
     if not IlastikPath is None:
         if not os.path.exists(IlastikPath):
-            #raise RuntimeWarning('Settings: ilastik path %s does not exists, cf. Settings.py or type help(Settings) for details.' % IlastikPath);
-            print('Settings: ilastik path %s does not exists, cf. Settings.py or type help(Settings) for details.' % IlastikPath);
+            #raise RuntimeWarning("Settings: ilastik path %s does not exists, cf. Settings.py or type help(Settings) for details." % IlastikPath);
+            print("Settings: ilastik path %s does not exists, cf. Settings.py or type help(Settings) for details." % IlastikPath);
             IlastikPath = None;
 
 setup();
