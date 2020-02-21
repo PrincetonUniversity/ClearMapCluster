@@ -518,7 +518,7 @@ def transformData(source, sink = [], transformParameterFile = None, transformDir
         raise RuntimeError('transformData: source not a string or array');
 
     if resultDirectory == None:
-        resultdirname = os.path.join(tempfile.tempdir, 'elastix_output');
+        resultdirname = os.path.join(tempfile.TemporaryDirectory().name, 'elastix_output');
     else:
         resultdirname = resultDirectory;
         
@@ -582,7 +582,7 @@ def deformationField(sink = [], transformParameterFile = None, transformDirector
     global TransformixBinary;    
     
     if resultDirectory == None:
-        resultdirname = os.path.join(tempfile.tempdir, 'elastix_output');
+        resultdirname = os.path.join(tempfile.TemporaryDirectory().name, 'elastix_output');
     else:
         resultdirname = resultDirectory;
         
@@ -705,7 +705,7 @@ def transformPoints(source, sink = None, transformParameterFile = None, transfor
     global ElastixSettings;
 
     if tmpFile == None:
-        tmpFile = os.path.join(tempfile.tempdir, 'elastix_input.txt');
+        tmpFile = os.path.join(tempfile.TemporaryDirectory().name, 'elastix_input.txt');
 
     # write text file
     if isinstance(source, str):
@@ -733,7 +733,7 @@ def transformPoints(source, sink = None, transformParameterFile = None, transfor
     
     
     if resultDirectory == None:
-        outdirname = os.path.join(tempfile.tempdir, 'elastix_output');
+        outdirname = os.path.join(tempfile.TemporaryDirectory().name, 'elastix_output');
     else:
         outdirname = resultDirectory;
         
