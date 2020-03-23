@@ -20,8 +20,8 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/202001_tpham_crus1_ymaze_cfos/200205_tpcrus1_lat_cfos_an4_1_3x_488_008na_1hfds_z10um_100msec_12-19-38"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/202001_tpham_crus1_ymaze_cfos/200205_tpcrus1_lat_cfos_an4_1_3x_647_008na_1hfds_z10um_250msec_12-09-43"): [["cellch", "00"]]}
+os.path.join(systemdirectory, "LightSheetTransfer/Jess/202003_mcherry_ymaze/200316_jv_mcherrydymaze_13_1_3x_488_008na_1hfds_z10um_100msec_15-58-53"): [["regch", "00"]],
+os.path.join(systemdirectory, "LightSheetTransfer/Jess/202003_mcherry_ymaze/200316_jv_mcherrydymaze_13_1_3x_647_008na_1hfds_z10um_250msec_15-48-55"): [["cellch", "00"]]}
 
 ####Required inputs
 
@@ -31,7 +31,7 @@ os.path.join(systemdirectory, "LightSheetTransfer/Jess/202001_tpham_crus1_ymaze_
 
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/202002_cfos/processed/an4_crus1_lat"),
+"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/202002_cfos/processed/an13_mcherrydymaze"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     #######################STEP 5 #######################
     #####################################################
     #Consolidate Cell detection
-    elif stepid == 5:
+    elif stepid == 5: 
         #clearmap:
         from ClearMap.cluster.par_tools import join_results_from_cluster
         join_results_from_cluster(**params)
@@ -137,4 +137,3 @@ if __name__ == "__main__":
         from ClearMap.cluster.par_tools import output_analysis
         output_analysis(threshold = (500, 8000), row = (2,2), check_cell_detection = False, **params) #note: zmd has set threshold and 
         #row variable manually... see GDoc for more info?
-
