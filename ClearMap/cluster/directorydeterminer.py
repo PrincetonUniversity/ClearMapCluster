@@ -12,14 +12,14 @@ def directorydeterminer():
     EDIT THIS to fit your paths.
     """
     if socket.gethostname() == "spock-login.pni.princeton.edu":
-        systemdirectory= "/jukebox/"    
+        systemdirectory= "/jukebox/"
     elif socket.gethostname() == "wang-38vfpd2":
-        systemdirectory= "/home/wanglab/"    
+        systemdirectory= "/home/wanglab/"
     elif socket.gethostname() == "pni-3cnxk02":
         systemdirectory= "/home/tpisano/"
     elif socket.gethostname() == "wanglab-cr8rc42-ubuntu":
         systemdirectory=  "/home/wanglab/"
-    elif socket.gethostname() == "PNI-1867vwtq2":#zmd added
+    elif socket.gethostname() == "PNI-1867VWTQ2":#zmd added
         systemdirectory = "/jukebox/"
     elif os.getcwd()[:6] == "/Users":
         systemdirectory= "/Volumes/"
