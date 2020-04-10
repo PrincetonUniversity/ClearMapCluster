@@ -6,9 +6,7 @@ Created on Mon Jan  7 11:16:03 2019
 @author: wanglab
 """
 
-import os
-
-import numpy as np, pandas as pd, xlrd, tifffile
+import os, numpy as np, pandas as pd, xlrd, tifffile, SimpleITK as sitk
 
 def labelPoints(points, labeledImage, level = None, collapse = None):
    """ borrowed/modified/cleaned up from Clearmap """
@@ -21,7 +19,7 @@ def labelPoints(points, labeledImage, level = None, collapse = None):
 
    pointLabels = np.zeros(nPoint, 'int32');
 
-   labelImage = tifffile.imread(labeledImage)
+   labelImage = sitk.GetArrayFromImage(sitk.ReadImage(labeledImage))
    dsize = labelImage.shape;
 
    for i in range(nPoint):
@@ -77,7 +75,7 @@ def countPointsInRegions(points, labeledImage, intensities = None, intensityRow 
 def make_table_of_transformed_cells(src, ann, ann_lut):
     """
     incorporates new atlas and look up table for anatomical analysis of cfos data done using:
-        https://github.com/PrincetonUniversity/clearmap_cluster
+        https://github.com/PrincetonUniversity/ClearMap
     NOTE: this assumes the clearmap transform has run correctly, and uses transformed cells
     """
 
@@ -125,7 +123,7 @@ def make_table_of_transformed_cells(src, ann, ann_lut):
             table["parent_acronym"] = [id2parentacr[i_d].value for i_d in ids[1:] if i_d in id2name.keys()]
             table["voxels_in_structure"] = [id2voxcount[i_d].value for i_d in ids[1:] if i_d in id2name.keys()]
 
-            pd.DataFrame.from_dict(table, orient = "columns").to_csv(os.path.join(src, "Annotated_counts_intensities_60um_edge_80um_vntric_erosion.csv"))
+            pd.DataFrame.from_dict(table, orient = "columns").to_csv(os.path.join(src, "Annotated_counts_intensities.csv"))
 
             #Without weigths (pure cell number):
             ids, counts = countPointsInRegions(points, labeledImage = ann, intensities = None)
@@ -142,7 +140,7 @@ def make_table_of_transformed_cells(src, ann, ann_lut):
             table["parent_acronym"] = [id2parentacr[i_d].value for i_d in ids[1:] if i_d in id2name.keys()]
             table["voxels_in_structure"] = [id2voxcount[i_d].value for i_d in ids[1:] if i_d in id2name.keys()]
 
-            pd.DataFrame.from_dict(table, orient = "columns").to_csv(os.path.join(src, "Annotated_counts_60um_edge_80um_vntric_erosion.csv"))
+            pd.DataFrame.from_dict(table, orient = "columns").to_csv(os.path.join(src, "Annotated_counts.csv"))
 
             print ("\n Analysis Completed\n")
         else:
@@ -156,10 +154,11 @@ if __name__ == "__main__":
     #inputs
 
     #LUT
-    ann = "/jukebox/LightSheetTransfer/atlas/annotation_sagittal_atlas_20um_iso_16bit_60um_edge_80um_vntric_erosion.tif"
-    ann_lut = "/jukebox/LightSheetTransfer/atlas/ls_id_table_w_voxelcounts.xlsx"
+    ann = "/jukebox/LightSheetTransfer/atlas/allen_atlas/annotation_2017_25um_sagittal_forDVscans.nrrd"
+    ann_lut = "/jukebox/LightSheetTransfer/atlas/allen_atlas/allen_id_table_w_voxel_counts.xlsx"
 
     pth = "/jukebox/LightSheetData/falkner-mouse/scooter/clearmap_processed"
 
-    for src in os.listdir(pth):
-        make_table_of_transformed_cells(os.path.join(pth, src), ann, ann_lut)
+    #for src in os.listdir(pth):
+    src = "fmnp5"
+    make_table_of_transformed_cells(os.path.join(pth, src), ann, ann_lut)
