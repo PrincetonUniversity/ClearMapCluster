@@ -157,7 +157,8 @@ def writeData(filename, data):
         #t.save(data.transpose([2,0,1,3]), photometric = 'minisblack',  planarconfig = 'contig');
         #t.save(data.transpose([2,1,0,3]), photometric = 'minisblack',  planarconfig = 'contig')
         #t.close();    
-        tiff.imsave(filename, data.transpose([2,1,0,3]), photometric = 'minisblack',  planarconfig = 'contig', bigtiff = True);
+        tiff.imsave(filename, data.transpose([2,1,0,3]), photometric = 'minisblack',
+                    planarconfig = 'contig', bigtiff = True);
     else:
         raise RuntimeError('writing multiple channel data to tif not supported!');
     
