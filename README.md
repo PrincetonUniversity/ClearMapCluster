@@ -1,10 +1,10 @@
 # ClearMapCluster
 
-T. Pisano's parallelization to a cluster of C. Kirst's ClearMap software (https://idisco.info/clearmap-2/) for use on a cluster using a slurm based scheduler. Written for Python 3.7+. Installation instructions at bottom of this read me. Modifications by Zahra M. 
+T. Pisano's parallelization to a cluster of C. Kirst's ClearMap software (https://idisco.info/clearmap-2/) for use on a cluster using a slurm based scheduler. Written for Python 3.7+. Modifications by Zahra M. 
 
 
 ## *INSTALLATION INSTRUCTIONS*:
-* Note that this currently has only been tested on linux (Ubuntu 16 and 18). 
+* Note that this currently has only been tested on Linux (Ubuntu 16 and 18). 
 * Things you will need to do beforehand:
 	* Elastix needs to be compiled on the cluster - this was challenging for IT here and suspect it will be for your IT as well.
 
@@ -42,17 +42,12 @@ Changes to ClearMap include, but not limited to:
 	* the function `ClearMap.cluster.directorydeterminer.directorydeterminer` *REQUIRES MODIFICATION* for both your local machine and cluster. This function handles different paths to the same file server.
 	* generally the process is using a local machine, run step 0 (be sure that files are saved *BEFORE (running this step) to generate a folder where data will be stored
 	* then using the cluster's headnode (in the new folder's clearmap directory generated from the previous step) submit the batch job: `sbatch sub_clearmap_cluster.sh`
-	* testing of clearmap can be using the:
-```
-from ClearMap.cluster.par_tools import celldetection_operations
-celldetection_operations(jobid, testing = True, **params)
-```
 
 * *ClearMap.cluster:*
-  * imageprocessing: most functions taken from tpisano's BrainPipe package
-  * par_tools: functions made to allow for division of labor of Kirst's ClearMap package
-  * ClearMap.cluster.directorydeterminer function to allow for different machines to use the same package
-  * utils: misc functions taken from tpisano's lightsheet package to make life easier
+  * `imageprocessing`: most functions taken from tpisano's BrainPipe package
+  * `par_tools`: functions made to allow for division of labor of Kirst's ClearMap package
+  * `directorydeterminer` function to allow for different machines to use the same package
+  * `utils`: misc functions taken from tpisano's BrainPipe package
 
 ### Edit: ClearMapCluster/sub_clearmap_cluster.sh file:
 * Need to load anacondapy [version] on cluster (something like):
@@ -82,7 +77,7 @@ module load elastix/4.8
 ### Edit: ClearMapCluster/ClearMap/cluster/directorydeterminer:
 * Add your paths for BOTH the cluster and local machinery
 
-### To run, please follow below:
+## To run, please follow below:
 * Open `run_clearmap_cluster.py`
 * For each brain modify:
 	* inputdictionary
@@ -94,5 +89,7 @@ if not os.path.exists(os.path.join(params['outputdirectory'], 'clearmap_cluster'
 	shutil.copytree(os.getcwd(), os.path.join(params['outputdirectory'], 'clearmap_cluster'))
 ```
 
-* For testing of clearmap cell detection, use `parameter_sweep.ipynb`
+## Tutorials and example analysis:
+* For a step-by-step tutorial on testing clearmap cell detection, use `parameter_sweep.ipynb`
+* For an example notebook on how to analyze c-Fos behavioral cohorts using the output from this package, use `ClearMapCluster/ClearMap/Analysis/cell_detection_analysis_cfos.ipynb`
 
