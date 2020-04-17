@@ -37,10 +37,13 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     
     vols=kwargs["volumes"]
     cfosvol = [xx for xx in vols if "cellch" in xx.ch_type][0]
-    autovol = [xx for xx in vols if "regch" in xx.ch_type][0]
+    #lightsheet mods
+    try:
+        autovol = [xx for xx in vols if "regch" in xx.ch_type][0]
+    except Exception as e:
+        print(e)
+        autovol = [xx for xx in vols if "cellch" in xx.ch_type][0]
     
-    
-
     ######################### Data parameters
     
     #Data File and Reference channel File, usually as a sequence of files from the microscope
