@@ -46,8 +46,8 @@ params={
 
 def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
                                      fIP_method_r, fIP_size_r, dCSP_threshold_r,
-                                     tick, optimization_chunk = 4, pth=False, rescale=False, 
-                                     cleanup =True, **kwargs):
+                                     tick, optimization_chunk=4, pth=False, rescale=False,
+                                     cleanup=True, **kwargs):
     """Function to sweep parameters
 
     final outputs will be saved in outputdirectory/parameter_sweep
@@ -79,7 +79,7 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
     if not os.path.exists(pth):
         try:
             #set params for sweep
-            kwargs["removeBackgroundParameter_size"] = (rBP_size, rBP_size) #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
+            kwargs["removeBackgroundParameter_size"] = (rBP_size,rBP_size) #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
             kwargs["findExtendedMaximaParameter_hmax"] = fEMP_hmax # (float or None)     h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
             kwargs["findExtendedMaximaParameter_size"] = fEMP_size # size in pixels (x,y) for the structure element of the morphological opening
             kwargs["findExtendedMaximaParameter_threshold"] = fEMP_threshold # (float or None)     include only maxima larger than a threshold, if None keep all local maxima
@@ -111,17 +111,21 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
 
             #optional rescale:
             if rescale:
-                raw_mx = rescale_intensity(raw_mx, in_range=str(raw_mx.dtype), out_range=rescale).astype(rescale)
-                bkg_mx = rescale_intensity(bkg_mx, in_range=str(bkg_mx.dtype), out_range=rescale).astype(rescale)
-                cell_mx = rescale_intensity(cell_mx, in_range=str(cell_mx.dtype), out_range=rescale).astype(rescale)
+                raw_mx = rescale_intensity(raw_mx, in_range=str(raw_mx.dtype),
+                    out_range=rescale).astype(rescale)
+                bkg_mx = rescale_intensity(bkg_mx, in_range=str(bkg_mx.dtype),
+                    out_range=rescale).astype(rescale)
+                cell_mx = rescale_intensity(cell_mx, in_range=str(cell_mx.dtype),
+                    out_range=rescale).astype(rescale)
 
             #concatenate and save out:
-            bigim = np.concatenate((raw_mx, bkg_mx, cell_mx), axis = 1); del bkg, bkg_im, bkg_mx, cell, cell_im,cell_mx
+            bigim = np.concatenate((raw_mx, bkg_mx, cell_mx), axis=1)
+            del bkg, bkg_im, bkg_mx, cell, cell_im,cell_mx
             if cleanup: removedir(out0)
-            if not cleanup: tifffile.imsave(pth, bigim, compress = 1)
+            if not cleanup: tifffile.imsave(pth, bigim, compress=1)
 
             #save in main
-            npth = out+"/jobid_{}_parametersweep_rBP_size{}_fEMP_hmax{}_fEMP_size{}_fEMP_threshold{}_fIP_method{}_fIP_size{}_dCSP_threshold{}.tif".format(str(jobid).zfill(4), rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold)
+            npth = out+"/jobid_{}_rBPSize{}_fEMPHmax{}_fEMPSize{}_fEMPThreshold{}_fIPMethod{}_fIPSize{}_dCSPThreshold{}.tif".format(str(jobid).zfill(4), rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold)
             tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
 
         except Exception as e:
@@ -135,7 +139,6 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
     return
 #%%
 if __name__ == "__main__":
-
     #parallelized for cluster
     print(sys.argv)
     stepid = int(sys.argv[1])
@@ -165,8 +168,8 @@ if __name__ == "__main__":
         fEMP_size_r = [0] # size in pixels (x,y) for the structure element of the morphological opening
         fEMP_threshold_r = [None] #range(0,10)
         fIP_method_r = ["Max"] #["Max, "Mean"]
-        fIP_size_r = [5,10,15,20]
-        dCSP_threshold_r = [50, 100, 200, 300]#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
+        fIP_size_r = [15,20]
+        dCSP_threshold_r = [100,300,500,700]#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
         ######################################################################################################
         ######################################################################################################
         ######################################################################################################

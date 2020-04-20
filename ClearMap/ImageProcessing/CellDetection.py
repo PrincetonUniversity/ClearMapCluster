@@ -18,7 +18,7 @@ function         a user defined function                                      NA
 
 Example:
 
-    >>> import ClearMap.IO as io  
+    >>> import ClearMap.IO as io
     >>> import ClearMap.Settings as settings
     >>> from ClearMap.ImageProcessing.CellDetection import detectCells;
     >>> fn = os.path.join(settings.ClearMapPath, 'Test/Data/Synthetic/test_iDISCO_\d{3}.tif');
@@ -43,15 +43,16 @@ from ClearMap.cluster.preprocessing import pth_update
 from ClearMap.Utils.Timer import Timer
 
 
-def detectCells(jobid, source, sink = None, method ="SpotDetection", processMethod = "sequential", verbose = False, **parameter):
+def detectCells(jobid, source, sink = None, method ="SpotDetection",
+                processMethod = "sequential", verbose = False, **parameter):
     """Detect cells in data
-    
-    This is a main script to start running the cell detection.    
-    
+
+    This is a main script to start running the cell detection.
+
     Arguments:
         source (str or array): Image source
         sink (str or None): destination for the results
-        method (str or function): 
+        method (str or function):
             ================ ============================================================
             Method           Description
             ================ ============================================================
@@ -59,18 +60,17 @@ def detectCells(jobid, source, sink = None, method ="SpotDetection", processMeth
             "Ilastik"        uses predefined pipline with cell classification via Ilastik
             function         a user defined function
             ================ ============================================================
-        processMethod (str or all): 'sequential' or 'parallel'. if all its choosen 
+        processMethod (str or all): 'sequential' or 'parallel'. if all its choosen
                                      automatically
         verbose (bool): print info
         **parameter (dict): parameter for the image procesing sub-routines
-    
-    TP: added JOBID for cluster jobs    
-    
+
+    TP: added JOBID for cluster jobs
+
     Returns:
-        
     """
     timer = Timer();
-        
+
     # run segmentation
     if method == "SpotDetection":
         detectCells = ClearMap.ImageProcessing.SpotDetection.detectSpots;
@@ -83,26 +83,23 @@ def detectCells(jobid, source, sink = None, method ="SpotDetection", processMeth
             print ('Ilastik functionality disabled')
     else:
         raise RuntimeError("detectCells: invalid method %s" % str(method));
-
     print ('ProcessMethod = {}'.format(processMethod))
-        
-    if processMethod == 'cluster':        
-        result, substack = sequentiallyProcessStack_usingCluster(jobid, pth_update(source), sink = pth_update(sink), 
-                                                                 function = detectCells, verbose = verbose, **parameter);
+
+    if processMethod == 'cluster':
+        result, substack = sequentiallyProcessStack_usingCluster(jobid, pth_update(source), sink = pth_update(sink),
+            function = detectCells, verbose = verbose, **parameter);
         if result == 'ENDPROCESS': return 'ENDPROCESS', 'ENDPROCESS'
     elif processMethod == 'sequential':
-        result = sequentiallyProcessStack(source, sink = sink, function = detectCells, verbose = verbose, **parameter);  
+        result = sequentiallyProcessStack(source, sink = sink, function = detectCells, verbose = verbose, **parameter);
     elif processMethod is all or processMethod == 'parallel':
-        result = parallelProcessStack(source, sink = sink, function = detectCells, verbose = verbose, **parameter);  
+        result = parallelProcessStack(source, sink = sink, function = detectCells, verbose = verbose, **parameter);
     else:
         raise RuntimeError("detectCells: invalid processMethod %s" % str(processMethod));
-    
+
     if verbose:
         timer.printElapsedTime("Total Cell Detection");
-    
-    if processMethod == 'cluster':        
+
+    if processMethod == 'cluster':
         return result, substack
     else:
         return result
-    
-
