@@ -182,9 +182,10 @@ if __name__ == "__main__":
 
         #iterate through combination of parameters
         try:
-            sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
-                                     fIP_method_r, fIP_size_r, dCSP_threshold_r, tick, cleanup = False,
-                                     **params)
+            sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, 
+                                     fEMP_size_r, fEMP_threshold_r, fIP_method_r, 
+                                     fIP_size_r, dCSP_threshold_r, tick, optimization_chunk=20,
+                                     cleanup = False, **params)
         except Exception as e:
             print("Jobid {}, Error given {}".format(jobid, e))
 
