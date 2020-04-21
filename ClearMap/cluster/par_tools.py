@@ -19,9 +19,9 @@ from ClearMap.Analysis.Statistics import thresholdPoints
 from ClearMap.Analysis.Label import labelToName
 from ClearMap.parameter_file import set_parameters_for_clearmap
 from ClearMap.cluster.preprocessing import listdirfull
-from ClearMap.ImageProcessing.StackProcessing import calculateSubStacks, noProcessing, joinPoints
+from ClearMap.ImageProcessing.StackProcessing import calculateSubStacks,\
+    noProcessing, joinPoints
 from scipy.ndimage.interpolation import zoom
-
 
 
 def resample_folder(cores, inn, out, zoomfactor, compression=0):

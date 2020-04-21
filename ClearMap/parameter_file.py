@@ -168,8 +168,6 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
         "detectCellShapeParameter"     : detectCellShapeParameter
     }
     
-    
-    
     #set directories
     if not testing:
         savedirectory = os.path.join(kwargs["outputdirectory"], "clearmap_cluster_output")
@@ -199,27 +197,22 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
         "weights" : None
     };
     
-    
-    
-    
-    
     ############################ Config parameters
     
     #Processes to use for Resampling (usually twice the number of physical processors)
     ResamplingParameter = {
         "processes": 16 
     };
-    
-    
+      
     #Stack Processing Parameter for cell detection
     StackProcessingParameter = {
         #max number of parallel processes. Be careful of the memory footprint of each process!
         "processes" : 1, #automatically set to 1 if using processMethod
        
         #chunk sizes: number of planes processed at once
-        "chunkSizeMax" : 60,
-        "chunkSizeMin" : 30,
-        "chunkOverlap" : 15,
+        "chunkSizeMax" : 10,
+        "chunkSizeMin" : 0,
+        "chunkOverlap" : 5,
     
         #optimize chunk size and number to number of processes to limit the number of cycles
         "chunkOptimization" : True,
@@ -230,14 +223,8 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
         "processMethod" : "cluster" #"sequential", "parallel"=local parallelization, "cluster" = parellization using cluster
        };
     
-    
-    
-    
-    
-    
     ######################## Run Parameters, usually you don"t need to change those
-    
-    
+
     ### Resample Fluorescent and CFos images
     # Autofluorescent cFos resampling for aquisition correction
     
@@ -299,8 +286,6 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     #elastix parameter files for alignment
     RegistrationAlignmentParameter["affineParameterFile"] = affinepth
     RegistrationAlignmentParameter["bSplineParameterFile"] = bsplinepth
-    
-    
     
     # result files for cell coordinates (csv, vtk or ims)
     SpotDetectionParameter = {
