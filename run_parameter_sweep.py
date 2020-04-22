@@ -163,13 +163,13 @@ if __name__ == "__main__":
         ######################################################################################################
         #NOTE: To adjust parameter sweep, modify ranges below
         ######################################################################################################
-        rBP_size_r = [3,5,7] ###evens seem to not be good  #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
+        rBP_size_r = [7,9,11] ###evens seem to not be good  #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
         fEMP_hmax_r = [None]# (float or None) h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
         fEMP_size_r = [0] # size in pixels (x,y) for the structure element of the morphological opening
         fEMP_threshold_r = [None] #range(0,10)
         fIP_method_r = ["Max"] #["Max, "Mean"]
-        fIP_size_r = [15,20]
-        dCSP_threshold_r = [100,300,500,700]#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
+        fIP_size_r = [20]
+        dCSP_threshold_r = [300,500,700]#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
         ######################################################################################################
         ######################################################################################################
         ######################################################################################################
