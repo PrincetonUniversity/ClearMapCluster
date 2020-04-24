@@ -135,5 +135,5 @@ if __name__ == "__main__":
     elif stepid == 6:
         #clearmap analysis, for description of inputs check docstring ["output_analysis?"]:
         from ClearMap.cluster.par_tools import output_analysis
-        output_analysis(threshold = (500, 8000), row = (2,2), check_cell_detection = False, **params) #note: zmd has set threshold and 
+        output_analysis(threshold = (1500, 10000), row = (2,2), check_cell_detection = False, **params) #note: zmd has set threshold and 
         #row variable manually... see GDoc for more info?

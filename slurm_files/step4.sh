@@ -1,12 +1,12 @@
 #!/bin/env bash
 #
 #SBATCH -p all                # partition (queue)
-#SBATCH -c 6                 # number of cores
-#SBATCH -t 700                 # time (minutes)
+#SBATCH -c 12                 # number of cores
+#SBATCH -t 500                 # time (minutes)
 #SBATCH -o logs/array_jobs/step4_%a.out        # STDOUT
 #SBATCH -e logs/array_jobs/step4_%a.err        # STDERR
 #SBATCH --contiguous #used to try and get cpu mem to be contigous
-
+#SBATCH --mem 150000 #150 gbs
 
 echo "In the directory: `pwd` "
 echo "As the user: `whoami` "
@@ -27,4 +27,3 @@ xvfb-run -w  $(( ( RANDOM % 30 )  + 1 )) python run_clearmap_cluster.py 4 ${SLUR
 
 # HOW TO USE:
 # sbatch --array=0-20 sub_arrayjob.sh 
-
