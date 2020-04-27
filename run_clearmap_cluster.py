@@ -20,8 +20,8 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/202003_mcherry_ymaze/200316_jv_mcherrydymaze_14_1_3x_488_008na_1hfds_z10um_100msec_15-35-04"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/202003_mcherry_ymaze/200316_jv_mcherrydymaze_14_1_3x_647_008na_1hfds_z10um_250msec_15-24-06"): [["cellch", "00"]]
+os.path.join(systemdirectory, "LightSheetTransfer/Jess/202003_mcherry_ymaze/200318_jv_mcherrydymaze_0_1_3x_488_008na_1hfds_z10um_100msec_17-03-02"): [["regch", "00"]],
+os.path.join(systemdirectory, "LightSheetTransfer/Jess/202003_mcherry_ymaze/200318_jv_mcherrydymaze_0_1_3x_647_008na_1hfds_z10um_250msec_16-51-55"): [["cellch", "00"]]
 }
 ####Required inputs
 
@@ -31,7 +31,7 @@ os.path.join(systemdirectory, "LightSheetTransfer/Jess/202003_mcherry_ymaze/2003
 
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/202002_cfos/processed/an14_mcherrydymaze"),
+"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/202002_cfos/processed/an0_mcherrydymaze"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
