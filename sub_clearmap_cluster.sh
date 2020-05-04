@@ -27,7 +27,7 @@ OUT3=$(sbatch --dependency=afterany:${OUT2##* } --array=0-2 slurm_files/step3.sh
 echo $OUT3
 
 #run cell detect
-OUT4=$(sbatch --dependency=afterany:${OUT2##* } --array=0-45 slurm_files/step4.sh) 
+OUT4=$(sbatch --dependency=afterany:${OUT2##* } --array=0-80 slurm_files/step4.sh) 
 echo $OUT4
 
 #consolidate cell detection

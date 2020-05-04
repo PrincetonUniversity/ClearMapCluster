@@ -210,9 +210,9 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
         "processes" : 1, #automatically set to 1 if using processMethod
        
         #chunk sizes: number of planes processed at once
-        "chunkSizeMax" : 30,
+        "chunkSizeMax" : 20,
         "chunkSizeMin" : 5,
-        "chunkOverlap" : 15,
+        "chunkOverlap" : 10,
     
         #optimize chunk size and number to number of processes to limit the number of cycles
         "chunkOptimization" : True,

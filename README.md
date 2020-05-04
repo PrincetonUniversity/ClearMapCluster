@@ -92,5 +92,4 @@ if not os.path.exists(os.path.join(params['outputdirectory'], 'clearmap_cluster'
 ## Tutorials and example analysis:
 * For a step-by-step tutorial on testing clearmap cell detection, use `parameter_sweep.ipynb`
 * For an example notebook on how to analyze c-Fos behavioral cohorts using the output from this package, use `ClearMapCluster/ClearMap/Analysis/cell_detection_analysis_cfos.ipynb`
-* For overlaying cells detected using ClearMap on your raw lightsheet images, use `ClearMap/Visualization/cell_detection_visualization_on_raw_data.ipynb`
 
