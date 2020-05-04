@@ -20,8 +20,7 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/brody/z266"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/brody/z266"): [["cellch", "00"]]
+os.path.join(systemdirectory, "LightSheetTransfer/brody/z267"): [["regch", "00"], ["cellch", "01"]]
 }
 ####Required inputs
 
@@ -31,7 +30,7 @@ os.path.join(systemdirectory, "LightSheetTransfer/brody/z266"): [["cellch", "00"
 
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "LightSheetData/rat-brody/processed/201910_tracing/clearmap/z266"),
+"outputdirectory": os.path.join(systemdirectory, "LightSheetData/rat-brody/processed/201910_tracing/clearmap/z267"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (1.63, 1.63, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
