@@ -20,7 +20,8 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/brody/z267"): [["regch", "00"], ["cellch", "01"]]
+os.path.join(systemdirectory, "LightSheetTransfer/brody/z267"): [["regch", "00"]],
+os.path.join(systemdirectory, "LightSheetTransfer/brody/z267"): [["cellch", "00"]]
 }
 ####Required inputs
 
