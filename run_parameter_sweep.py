@@ -24,16 +24,16 @@ systemdirectory = directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/brody/z265"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/brody/z265"): [["cellch", "00"]]
+os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos_201810/181011_f37077_observer_20171011_488_017na_1hfds_z5um_150msec_14-27-28"): [["regch", "00"]],
+os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos_201810/181011_f37077_observer_20171011_790_017na_1hfds_z5um_1000msec_13-29-49"): [["cellch", "00"]]
 }
 
 ####Required inputs
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "LightSheetData/rat-brody/processed/201910_tracing/clearmap/z265"),
+"outputdirectory": os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos_201810/181011_f37077_observer_20171011_790_017na_1hfds_z5um_1000msec_13-29-49/clearmap"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
-"xyz_scale": (1.63, 1.63, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
+"xyz_scale": (5.0, 5.0, 5.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
 "AtlasFile" : os.path.join(systemdirectory, "LightSheetData/brodyatlas/atlas/for_registration_to_lightsheet/WHS_SD_rat_T2star_v1.01_atlas.tif"), ###it is assumed that input image will be a horizontal scan with anterior being "up"; USE .TIF!!!!
 "annotationfile" :  os.path.join(systemdirectory, "LightSheetData/brodyatlas/atlas/for_registration_to_lightsheet/WHS_SD_rat_atlas_v3_annotation.tif"), ###path to annotation file for structures
@@ -150,7 +150,9 @@ if __name__ == "__main__":
         ###make parameter dictionary and pickle file:
         updateparams(os.getcwd(), **params) # e.g. single job assuming directory_determiner function has been properly set
         #copy folder into output for records
-        if not os.path.exists(os.path.join(params["outputdirectory"], "ClearMapCluster")): shutil.copytree(os.getcwd(), os.path.join(params["outputdirectory"], "clearmap_cluster"), ignore=shutil.ignore_patterns("^.git")) #copy run folder into output to save run info
+        if not os.path.exists(os.path.join(params["outputdirectory"], "ClearMapCluster")): 
+            shutil.copytree(os.getcwd(), os.path.join(params["outputdirectory"], "ClearMapCluster"), 
+            ignore=shutil.ignore_patterns("^.git")) #copy run folder into output to save run info
         #make planes
         for stepid in range(0, 30):
             arrayjob(stepid, cores=12, compression=1, **params)
@@ -163,13 +165,13 @@ if __name__ == "__main__":
         ######################################################################################################
         #NOTE: To adjust parameter sweep, modify ranges below
         ######################################################################################################
-        rBP_size_r = [7,9,11] ###evens seem to not be good  #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
+        rBP_size_r = [3,5,7] ###evens seem to not be good  #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
         fEMP_hmax_r = [None]# (float or None) h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
         fEMP_size_r = [0] # size in pixels (x,y) for the structure element of the morphological opening
         fEMP_threshold_r = [None] #range(0,10)
         fIP_method_r = ["Max"] #["Max, "Mean"]
-        fIP_size_r = [20]
-        dCSP_threshold_r = [300,500,700]#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
+        fIP_size_r = [5,10,20]
+        dCSP_threshold_r = [100,300,500,700]#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
         ######################################################################################################
         ######################################################################################################
         ######################################################################################################

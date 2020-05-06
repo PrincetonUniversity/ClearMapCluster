@@ -5,7 +5,7 @@
 #SBATCH -t 500                 # time (minutes)
 #SBATCH -o /scratch/zmd/logs/param_sweep_step1_%a.out        # STDOUT
 #SBATCH -e /scratch/zmd/logs/param_sweep_step1_%a.err        # STDERR
-#SBATCH --mem 150000 #150 gbs
+#SBATCH --mem 80000 #80 gbs
 
 module load anacondapy/5.3.1
 module load elastix/4.8

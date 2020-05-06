@@ -20,8 +20,8 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/kelly/201908_cfos/190820_m62195_mouse1_20190627_1d3x_488_008na_1hfds_z5um_150msec_16-53-54"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/kelly/201908_cfos/190820_m62195_mouse1_20190627_1d3x_647_008na_1hfds_z5um_250msec_16-32-01"): [["cellch", "00"]]
+os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos/171209_f37104_demonstrator_20171016_488_015na_1hfsds_z5um_150msec_16-54-32"): [["regch", "00"]],
+os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos/171209_f37104_demonstrator_20171016_790_015na_1hfsds_z5um_1000msec_15-46-13"): [["cellch", "00"]]
 }
 ####Required inputs
 
@@ -31,7 +31,7 @@ os.path.join(systemdirectory, "LightSheetTransfer/kelly/201908_cfos/190820_m6219
 
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "LightSheetTransfer/kelly/201908_cfos/190820_m62195_mouse1_20190627_1d3x_647_008na_1hfds_z5um_250msec_16-32-01/clearmap"),
+"outputdirectory": os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos/171209_f37104_demonstrator_20171016_790_015na_1hfsds_z5um_1000msec_15-46-13/clearmap"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 5.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
@@ -48,8 +48,8 @@ params={
 "findExtendedMaximaParameter_size": 0, # size in pixels (x,y) for the structure element of the morphological opening
 "findExtendedMaximaParameter_threshold": None, # (float or None)     include only maxima larger than a threshold, if None keep all local maxima
 "findIntensityParameter_method": "Max", # (str, func, None)   method to use to determine intensity (e.g. "Max" or "Mean") if None take intensities at the given pixels
-"findIntensityParameter_size": (5,5,5), # (tuple)             size of the search box on which to perform the *method*
-"detectCellShapeParameter_threshold": 250# (float or None)      threshold to determine mask. Pixels below this are background if None no mask is generated
+"findIntensityParameter_size": (10,10,10), # (tuple)             size of the search box on which to perform the *method*
+"detectCellShapeParameter_threshold": 75# (float or None)      threshold to determine mask. Pixels below this are background if None no mask is generated
 }
 #####################################################################################################################################################
 ##################################################optional arguments for params######################################################################
@@ -135,5 +135,5 @@ if __name__ == "__main__":
     elif stepid == 6:
         #clearmap analysis, for description of inputs check docstring ["output_analysis?"]:
         from ClearMap.cluster.par_tools import output_analysis
-        output_analysis(threshold = (1500, 10000), row = (2,2), check_cell_detection = False, **params) #note: zmd has set threshold and 
+        output_analysis(threshold = (500, 10000), row = (2,2), check_cell_detection = False, **params) #note: zmd has set threshold and 
         #row variable manually... see GDoc for more info?
