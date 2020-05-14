@@ -20,8 +20,8 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos/171209_f37104_demonstrator_20171016_488_015na_1hfsds_z5um_150msec_16-54-32"): [["regch", "00"]],
-os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos/171209_f37104_demonstrator_20171016_790_015na_1hfsds_z5um_1000msec_15-46-13"): [["cellch", "00"]]
+os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos_201810/181015_f37080_mouse1_20171015_488_017na_1hfds_z5um_150msec_09-17-04"): [["regch", "00"]],
+os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos_201810/181015_f37080_mouse1_20171015_790_017na_1hfds_z5um_1000msec_08-22-40"): [["cellch", "00"]]
 }
 ####Required inputs
 
@@ -31,7 +31,7 @@ os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos/1
 
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos/171209_f37104_demonstrator_20171016_790_015na_1hfsds_z5um_1000msec_15-46-13/clearmap"),
+"outputdirectory": os.path.join(systemdirectory, "wang/seagravesk/lightsheet/cfos_raw_images/cfos_201810/181015_f37080_mouse1_20171015_790_017na_1hfds_z5um_1000msec_08-22-40/clearmap"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 5.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
