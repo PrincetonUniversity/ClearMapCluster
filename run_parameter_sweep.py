@@ -125,7 +125,8 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             if not cleanup: tifffile.imsave(pth, bigim, compress=1)
 
             #save in main
-            npth = out+"/jobid_{}_rBPSize{}_fEMPHmax{}_fEMPSize{}_fEMPThreshold{}_fIPMethod{}_fIPSize{}_dCSPThreshold{}.tif".format(str(jobid).zfill(4), rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold)
+            npth = out0+"/parametersweep_rBP_size{}_fEMP_hmax{}_fEMP_size{}_fEMP_threshold{}_fIP_method{}_fIP_size{}_dCSP_threshold{}.tif".format(rBP_size,
+        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold)
             tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
 
         except Exception as e:
