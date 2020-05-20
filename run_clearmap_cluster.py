@@ -20,8 +20,8 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/200321_dadult_mli_lobvi_6_1_3x_488_016na_1hfds_z10um_100msec_14-36-15"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/200321_dadult_mli_lobvi_6_1_3x_647_016na_1hfds_z10um_250msec_14-27-02"): [["cellch", "00"]]
+os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/200321_dadult_mli_lobvi_2_1_3x_488_016na_1hfds_z10um_100msec_16-27-57"): [["regch", "00"]],
+os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/200321_dadult_mli_lobvi_2_1_3x_647_016na_1hfds_z10um_250msec_16-17-07"): [["cellch", "00"]]
 }
 ####Required inputs
 
@@ -31,7 +31,7 @@ os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/20032
 
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/pretreatadult/forebrain/processed/dadult_mli_lobvi_06"),
+"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/pretreatadult/forebrain/processed/dadult_mli_lobvi_02"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 5.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
@@ -41,7 +41,8 @@ params={
 "blendtype" : "sigmoidal", #False/None, "linear", or "sigmoidal" blending between tiles, usually sigmoidal; False or None for images where blending would be detrimental;
 "intensitycorrection" : False, #True = calculate mean intensity of overlap between tiles shift higher of two towards lower - useful for images where relative intensity is not important (i.e. tracing=True, cFOS=False)
 "rawdata" : True, # set to true if raw data is taken from scope and images need to be flattened; functionality for rawdata =False has not been tested**
-"FinalOrientation": (3, 2, 1), #Orientation: 1,2,3 means the same orientation as the reference and atlas files; #Flip axis with - sign (eg. (-1,2,3) flips x). 3D Rotate by swapping numbers. (eg. (2,1,3) swaps x and y); USE (3,2,1) for DVhorizotnal to sagittal. NOTE (TP): -3 seems to mess up the function and cannot seem to figure out why. do not use.
+"FinalOrientation": (3, 2, 1), #Orientation: 1,2,3 means the same orientation as the reference and atlas files; #Flip axis with - sign (eg. (-1,2,3) flips x). 3D Rotate by swapping numbers. 
+#(eg. (2,1,3) swaps x and y); USE (3,2,1) for DVhorizotnal to sagittal. NOTE (TP): -3 seems to mess up the function and cannot seem to figure out why. do not use.
 "slurmjobfactor": 50, #number of array iterations per arrayjob since max job array on SPOCK is 1000
 "removeBackgroundParameter_size": (5,5), #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
 "findExtendedMaximaParameter_hmax": None, # (float or None)     h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
@@ -59,7 +60,8 @@ params={
 #regexpression: "r"(.*)(.*C+)(?P<ch>[0-9]{1,2})(.*Z+)(?P<z>[0-9]{1,4})(.ome.tif)", lavision Channels and Z
 #"AtlasResolution": (20,20,20), #um/voxel, optional resolution of atlas, used in resampling and will default to 25um if not provided
 #"ResolutionAffineCFosAutoFluo": (16, 16, 16), #optional scaling for cfos to auto, will default to 16 isotropic
-#"parameterfolder" : os.path.join(systemdirectory, "wang/pisano/Python/lightsheet/parameterfolder"), ##  * folder consisting of elastix parameter files with prefixes "Order<#>_" to specify application order
+#"parameterfolder" : os.path.join(systemdirectory, "wang/pisano/Python/lightsheet/parameterfolder"), ##  * folder consisting of elastix parameter 
+#files with prefixes "Order<#>_" to specify application order
 #"removeBackgroundParameter_size": (7,7), #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
 #"findExtendedMaximaParameter_hmax": None, # (float or None)     h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
 #"findExtendedMaximaParameter_size": 5 # size in pixels (x,y) for the structure element of the morphological opening
@@ -95,7 +97,8 @@ if __name__ == "__main__":
     #####################################################
     elif stepid == 1:
         ###stitch, resample, and save files
-        arrayjob(jobid, cores=5, compression=1, **params) #process zslice numbers equal to slurmjobfactor*jobid thru (jobid+1)*slurmjobfactor
+        #process zslice numbers equal to slurmjobfactor*jobid thru (jobid+1)*slurmjobfactor
+        arrayjob(jobid, cores=5, compression=1, **params) 
 
     #######################STEP 2 #######################
     #####################################################
@@ -135,5 +138,7 @@ if __name__ == "__main__":
     elif stepid == 6:
         #clearmap analysis, for description of inputs check docstring ["output_analysis?"]:
         from ClearMap.cluster.par_tools import output_analysis
-        output_analysis(threshold = (1500, 10000), row = (2,2), check_cell_detection = False, **params) #note: zmd has set threshold and 
-        #row variable manually... see GDoc for more info?
+        output_analysis(threshold = (1500, 10000), row = (2,2), check_cell_detection = False, **params) 
+        #note: zmd has set threshold and 
+        #row variable manually
+        #see https://drive.google.com/file/d/1QgrF6rpiICMtJe3Sury9-9djBnfyt20m/view?usp=sharing for more info
