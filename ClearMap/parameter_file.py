@@ -89,7 +89,7 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
         ex = os.path.join(exmaxdir, "extendmax\d{4}.ome.tif")
         celldir = os.path.join(optdir, "cell"); makedir(celldir)
         cell = os.path.join(celldir, "cell\d{4}.ome.tif")
-        illum =  os.path.join(optdir, "illumination_correction")
+        illum = None
 
 
     else:

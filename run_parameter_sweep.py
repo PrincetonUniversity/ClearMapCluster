@@ -9,11 +9,13 @@ Created on Tue Aug  7 20:41:01 2018
 import os, sys, shutil, pickle, tifffile, numpy as np
 from itertools import product
 from xvfbwrapper import Xvfb; vdisplay = Xvfb(); vdisplay.start()
-from skimage.exposure import rescale_intensity
-from ClearMap.cluster.preprocessing import updateparams, listdirfull, arrayjob, makedir, removedir
+from ClearMap.cluster.preprocessing import updateparams, listdirfull, arrayjob, makedir, removedir, pth_update
 from ClearMap.cluster.directorydeterminer import directorydeterminer
-from ClearMap.cluster.par_tools import celldetection_operations
+from ClearMap.cluster.par_tools import celldetection_operations,join_results_from_cluster_helper
 from ClearMap.cluster.utils import load_kwargs
+from ClearMap.parameter_file import set_parameters_for_clearmap
+import ClearMap.IO as io
+from ClearMap.Analysis.Statistics import thresholdPoints
 
 systemdirectory = directorydeterminer()
 ###set paths to data
@@ -31,7 +33,7 @@ os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/20032
 ####Required inputs
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/pretreatadult/forebrain/processed/dadult_mli_lobvi_09"),
+"outputdirectory": os.path.join(systemdirectory, "Desktop/dadult_mli_lobvi_09"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
@@ -45,9 +47,8 @@ params={
 }
 
 def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
-                                     fIP_method_r, fIP_size_r, dCSP_threshold_r,
-                                     tick, optimization_chunk=4, pth=False, rescale=False,
-                                     cleanup=True, **kwargs):
+                                     fIP_method_r, fIP_size_r, dCSP_threshold_r,thresholds_rows,
+                                     tick, optimization_chunk=4, pth=False, cleanup=True, **kwargs):
     """Function to sweep parameters
 
     final outputs will be saved in outputdirectory/parameter_sweep
@@ -68,13 +69,13 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
     out = opt+"/parameter_sweep"; makedir(out)
     out0 = opt+"/parameter_sweep_jobid_{}".format(str(jobid).zfill(4)); makedir(out0)
 
-    rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold=[(rBP_size,
-        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold) for rBP_size, fEMP_hmax,
-        fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold in product(rBP_size_r, fEMP_hmax_r, fEMP_size_r,
-        fEMP_threshold_r, fIP_method_r, fIP_size_r, dCSP_threshold_r)][jobid]
+    rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row=[(rBP_size,
+        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row) for rBP_size, fEMP_hmax,
+        fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row in product(rBP_size_r, fEMP_hmax_r, fEMP_size_r,
+        fEMP_threshold_r, fIP_method_r, fIP_size_r, dCSP_threshold_r,thresholds_rows)][jobid]
 
-    pth = out0+"/parametersweep_rBP_size{}_fEMP_hmax{}_fEMP_size{}_fEMP_threshold{}_fIP_method{}_fIP_size{}_dCSP_threshold{}.tif".format(rBP_size,
-        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold)
+    pth = out0+"/rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}tow{}.tif".format(rBP_size,
+        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])
 
     if not os.path.exists(pth):
         try:
@@ -95,7 +96,11 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
 
             #run cell detection
             sys.stdout.write("\n\n\n           *****Iteration {} of {}*****\n\n\n".format(jobid, tick))
-            sys.stdout.write("    Iteration parameters: {}     {}     {}     {}     {}     {}     {}".format(kwargs["removeBackgroundParameter_size"], kwargs["findExtendedMaximaParameter_hmax"], kwargs["findExtendedMaximaParameter_size"], kwargs["findExtendedMaximaParameter_threshold"],         kwargs["findIntensityParameter_method"],         kwargs["findIntensityParameter_size"],        kwargs["detectCellShapeParameter_threshold"]))
+            sys.stdout.write("    Iteration parameters: {}     {}     {}     {}     {}     {}     {}".format(kwargs["removeBackgroundParameter_size"], 
+            kwargs["findExtendedMaximaParameter_hmax"], kwargs["findExtendedMaximaParameter_size"], 
+            kwargs["findExtendedMaximaParameter_threshold"], kwargs["findIntensityParameter_method"],
+            kwargs["findIntensityParameter_size"], kwargs["detectCellShapeParameter_threshold"]))
+            
             celldetection_operations(optimization_chunk, testing=True, **kwargs)
 
             #list, load, and maxip
@@ -109,15 +114,6 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             cell_im = tifffile.imread(cell)
             cell_mx = np.max(cell_im, axis = 0)
 
-            #optional rescale:
-            if rescale:
-                raw_mx = rescale_intensity(raw_mx, in_range=str(raw_mx.dtype),
-                    out_range=rescale).astype(rescale)
-                bkg_mx = rescale_intensity(bkg_mx, in_range=str(bkg_mx.dtype),
-                    out_range=rescale).astype(rescale)
-                cell_mx = rescale_intensity(cell_mx, in_range=str(cell_mx.dtype),
-                    out_range=rescale).astype(rescale)
-
             #concatenate and save out:
             bigim = np.concatenate((raw_mx, bkg_mx, cell_mx), axis=1)
             del bkg, bkg_im, bkg_mx, cell, cell_im,cell_mx
@@ -125,14 +121,36 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             if not cleanup: tifffile.imsave(pth, bigim, compress=1)
 
             #save in main
-            npth = out0+"/parametersweep_rBP_size{}_fEMP_hmax{}_fEMP_size{}_fEMP_threshold{}_fIP_method{}_fIP_size{}_dCSP_threshold{}.tif".format(rBP_size,
-        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold)
+            npth = out0+"/rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}tow{}.tif".format(rBP_size,
+        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])
             tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
 
+            #make cells detected array
+            dct = pth_update(set_parameters_for_clearmap(testing=True, **params))
+            out = join_results_from_cluster_helper(**dct["ImageProcessingParameter"])    
+            #threshold and export
+            points, intensities = io.readPoints(dct["ImageProcessingParameter"]["sink"])
+            #Thresholding: the threshold parameter is either intensity or size in voxel, depending on the chosen "row"
+            #row = (0,0) : peak intensity from the raw data
+            #row = (1,1) : peak intensity from the DoG filtered data
+            #row = (2,2) : peak intensity from the background subtracted data
+            #row = (3,3) : voxel size from the watershed
+            points, intensities = thresholdPoints(points, intensities, threshold = thres_row[0], 
+                                row = thres_row[1])
+            #change dst to match parameters sweeped
+            dst = (os.path.join(out, 
+            "cells_rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}row{}.npy".format(rBP_size,
+            fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])),
+                   
+            os.path.join(out, 
+            "intensities_rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}row{}.npy".format(rBP_size,
+            fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])))
+            
+            io.writePoints(dst, (points, intensities));
+            print("\n           finished step thresholding step \n")
+        
         except Exception as e:
             print("Error on: {}\n\nerror={}".format(pth,e))
-            im = np.zeros((10,10,10))
-            tifffile.imsave(pth, im, compress = 1)
             with open(os.path.join(out, "errored_files.txt"), "a") as fl:
                 fl.write("\n\n{}\n{}\n".format(pth, kwargs))
                 fl.close
@@ -172,14 +190,15 @@ if __name__ == "__main__":
         fEMP_threshold_r = [None] #range(0,10)
         fIP_method_r = ["Max"] #["Max, "Mean"]
         fIP_size_r = [3]
-        dCSP_threshold_r = [100,300,500,700]#[60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225]#range(50, 200, 10)
+        dCSP_threshold_r = [100,300,500,700]
+        thresholds_rows = [[(500, 10000), (2,2)], [(1500, 10000), (2,2)], [(20,900), (3,3)]]
         ######################################################################################################
         ######################################################################################################
         ######################################################################################################
         # calculate number of iterations
         tick = 0
-        for rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold in product(rBP_size_r,fEMP_hmax_r, fEMP_size_r,
-            fEMP_threshold_r, fIP_method_r, fIP_size_r, dCSP_threshold_r):
+        for rBP_size, fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold, thres_row in product(rBP_size_r,fEMP_hmax_r, fEMP_size_r,
+            fEMP_threshold_r, fIP_method_r, fIP_size_r, dCSP_threshold_r, thresholds_rows):
             tick +=1
         sys.stdout.write("\n\nNumber of iterations is {}:".format(tick))
 
@@ -187,7 +206,7 @@ if __name__ == "__main__":
         try:
             sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, 
                                      fEMP_size_r, fEMP_threshold_r, fIP_method_r, 
-                                     fIP_size_r, dCSP_threshold_r, tick, optimization_chunk=20,
+                                     fIP_size_r, dCSP_threshold_r, thresholds_rows, tick, optimization_chunk=20,
                                      cleanup = False, **params)
         except Exception as e:
             print("Jobid {}, Error given {}".format(jobid, e))
