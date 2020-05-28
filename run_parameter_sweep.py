@@ -42,7 +42,8 @@ params={
 
 def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
                                      fIP_method_r, fIP_size_r, dCSP_threshold_r,thresholds_rows,
-                                     tick, optimization_chunk=4, pth=False, cleanup=True, **kwargs):
+                                     tick, optimization_chunk=4, pth=False, cleanup=True, save=False,
+                                     **kwargs):
     """Function to sweep parameters
 
     final outputs will be saved in outputdirectory/parameter_sweep
@@ -97,27 +98,28 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             
             celldetection_operations(optimization_chunk, testing=True, **kwargs)
 
-            #list, load, and maxip
-            raw = [xx for xx in listdirfull(out0+"/optimization/raw") if "~" not in xx and ".db" not in xx]; raw.sort();
-            raw_im = np.squeeze(tifffile.imread(raw))
-            raw_mx = np.max(raw_im, axis = 0)
-            bkg = [xx for xx in listdirfull(out0+"/optimization/background") if "~" not in xx and "Thumbs.db" not in xx]; bkg.sort()
-            bkg_im = tifffile.imread(bkg)
-            bkg_mx = np.max(bkg_im, axis = 0)
-            cell = [xx for xx in listdirfull(out0+"/optimization/cell") if "~" not in xx and ".db" not in xx]; cell.sort()
-            cell_im = tifffile.imread(cell)
-            cell_mx = np.max(cell_im, axis = 0)
-
-            #concatenate and save out:
-            bigim = np.concatenate((raw_mx, bkg_mx, cell_mx), axis=1)
-            del bkg, bkg_im, bkg_mx, cell, cell_im,cell_mx
-            if cleanup: removedir(out0)
-            if not cleanup: tifffile.imsave(pth, bigim, compress=1)
-
-            #save in main
-            npth = out0+"/rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}tow{}.tif".format(rBP_size,
-        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])
-            tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
+            if save:
+                #list, load, and maxip
+                raw = [xx for xx in listdirfull(out0+"/optimization/raw") if "~" not in xx and ".db" not in xx]; raw.sort();
+                raw_im = np.squeeze(tifffile.imread(raw))
+                raw_mx = np.max(raw_im, axis = 0)
+                bkg = [xx for xx in listdirfull(out0+"/optimization/background") if "~" not in xx and "Thumbs.db" not in xx]; bkg.sort()
+                bkg_im = tifffile.imread(bkg)
+                bkg_mx = np.max(bkg_im, axis = 0)
+                cell = [xx for xx in listdirfull(out0+"/optimization/cell") if "~" not in xx and ".db" not in xx]; cell.sort()
+                cell_im = tifffile.imread(cell)
+                cell_mx = np.max(cell_im, axis = 0)
+    
+                #concatenate and save out:
+                bigim = np.concatenate((raw_mx, bkg_mx, cell_mx), axis=1)
+                del bkg, bkg_im, bkg_mx, cell, cell_im,cell_mx
+                if cleanup: removedir(out0)
+                if not cleanup: tifffile.imsave(pth, bigim, compress=1)
+    
+                #save in main
+                npth = out0+"/rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}row{}.tif".format(rBP_size,
+                            fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])
+                tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
 
             #make cells detected array
             dct = pth_update(set_parameters_for_clearmap(testing=True, **params))
