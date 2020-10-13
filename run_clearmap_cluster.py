@@ -20,8 +20,8 @@ systemdirectory=directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/200321_dadult_mli_lobvi_1_1_3x_488_016na_1hfds_z10um_100msec_16-06-18"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/200321_dadult_mli_lobvi_1_1_3x_647_016na_1hfds_z10um_250msec_15-52-37"): [["cellch", "00"]]
+os.path.join(systemdirectory, "LightSheetData/lightserv/jverpeut/ymazecfos_learning_verpeut/ymazecfos_learning_verpeut-005/imaging_request_1/rawdata/resolution_1.3x/200924_072420_jv_ymazelearn_an5_1_3x_488_008na_1hfds_z10um_50msec_13-55-45"): [["regch", "00"]],
+os.path.join(systemdirectory, "LightSheetData/lightserv/jverpeut/ymazecfos_learning_verpeut/ymazecfos_learning_verpeut-005/imaging_request_1/rawdata/resolution_1.3x/200924_072420_jv_ymazelearn_an5_1_3x_647_008na_1hfds_z10um_50msec_13-49-18"): [["cellch", "00"]]
 }
 ####Required inputs
 
@@ -31,9 +31,9 @@ os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/20032
 
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/pretreatadult/forebrain/processed/dadult_mli_lobvi_01"),
+"outputdirectory": os.path.join(systemdirectory, "wang/Jess/lightsheet_output/202010_cfos/processed/an005"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
-"xyz_scale": (5.0, 5.0, 5.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
+"xyz_scale": (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
 "AtlasFile" : os.path.join(systemdirectory, "LightSheetTransfer/atlas/sagittal_atlas_20um_iso.tif"), ###it is assumed that input image will be a horizontal scan with anterior being "up"; USE .TIF!!!!
 "annotationfile" :   os.path.join(systemdirectory, "LightSheetTransfer/atlas/annotation_sagittal_atlas_20um_iso.tif"), ###path to annotation file for structures
@@ -87,7 +87,8 @@ if __name__ == "__main__":
     #####################################################
     if stepid == 0:
         ###make parameter dictionary and pickle file:
-        updateparams(os.getcwd(), **params) # e.g. single job assuming directory_determiner function has been properly set
+        # e.g. single job assuming directory_determiner function has been properly set
+        updateparams(os.getcwd(), **params) 
         #copy folder into output for records
         if not os.path.exists(os.path.join(params["outputdirectory"], "ClearMapCluster")): 
             shutil.copytree(os.getcwd(), os.path.join(params["outputdirectory"], "ClearMapCluster"), 

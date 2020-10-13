@@ -31,8 +31,8 @@ def set_parameters_for_clearmap(testing=False, **kwargs):
     
     ##input data from preprocessing:
     with open(os.path.join(kwargs["outputdirectory"], "param_dict.p"), "rb") as pckl:
-            kwargs.update(pickle.load(pckl))
-            pckl.close()
+        kwargs.update(pickle.load(pckl))
+        pckl.close()
     kwargs = pth_update(kwargs)
     
     vols=kwargs["volumes"]

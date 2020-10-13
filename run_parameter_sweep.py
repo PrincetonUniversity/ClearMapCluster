@@ -26,14 +26,14 @@ systemdirectory = directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/200321_dadult_mli_lobvi_9_1_3x_488_016na_1hfds_z10um_100msec_14-58-26"): [["regch", "00"]],
-os.path.join(systemdirectory, "LightSheetTransfer/Jess/lawrence_forebrains/200321_dadult_mli_lobvi_9_1_3x_647_016na_1hfds_z10um_250msec_14-49-18"): [["cellch", "00"]]
+os.path.join(systemdirectory,"LightSheetData/lightserv/jverpeut/ymazecfos_learning_verpeut/ymazecfos_learning_verpeut-008/imaging_request_1/rawdata/resolution_1.3x/200924_072420_jv_ymazelearn_an8_1_3x_488_008na_1hfds_z10um_50msec_16-50-15"): [["regch", "00"]],
+os.path.join(systemdirectory,"LightSheetData/lightserv/jverpeut/ymazecfos_learning_verpeut/ymazecfos_learning_verpeut-008/imaging_request_1/rawdata/resolution_1.3x/200924_072420_jv_ymazelearn_an8_1_3x_647_008na_1hfds_z10um_50msec_16-42-44"): [["cellch", "00"]]
 }
 
 ####Required inputs
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
-"outputdirectory": os.path.join(systemdirectory, "Desktop/dadult_mli_lobvi_09"),
+"outputdirectory": os.path.join(systemdirectory,"wang/Jess/lightsheet_output/202010_cfos/parameter_sweep/an8"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
@@ -42,7 +42,7 @@ params={
 "blendtype" : "sigmoidal", #False/None, "linear", or "sigmoidal" blending between tiles, usually sigmoidal; False or None for images where blending would be detrimental;
 "intensitycorrection" : False, #True = calculate mean intensity of overlap between tiles shift higher of two towards lower - useful for images where relative intensity is not important (i.e. tracing=True, cFOS=False)
 "rawdata" : True, # set to true if raw data is taken from scope and images need to be flattened; functionality for rawdata =False has not been tested**
-"FinalOrientation": (3, 2, 1), #Orientation: 1,2,3 means the same orientation as the reference and atlas files; #Flip axis with - sign (eg. (-1,2,3) flips x). 3D Rotate by swapping numbers. (eg. (2,1,3) swaps x and y); USE (3,2,1) for DVhorizotnal to sagittal. NOTE (TP): -3 seems to mess up the function and cannot seem to figure out why. do not use.
+"FinalOrientation": (3,2,1), #Orientation: 1,2,3 means the same orientation as the reference and atlas files; #Flip axis with - sign (eg. (-1,2,3) flips x). 3D Rotate by swapping numbers. (eg. (2,1,3) swaps x and y); USE (3,2,1) for DVhorizotnal to sagittal. NOTE (TP): -3 seems to mess up the function and cannot seem to figure out why. do not use.
 "slurmjobfactor": 50, #number of array iterations per arrayjob since max job array on SPOCK is 1000
 }
 
@@ -126,7 +126,7 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
 
             #make cells detected array
-            dct = pth_update(set_parameters_for_clearmap(testing=True, **params))
+            dct = pth_update(set_parameters_for_clearmap(testing=True, **nkwargs))
             out = join_results_from_cluster_helper(**dct["ImageProcessingParameter"])    
             #threshold and export
             points, intensities = io.readPoints(dct["ImageProcessingParameter"]["sink"])
@@ -138,11 +138,10 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             points, intensities = thresholdPoints(points, intensities, threshold = thres_row[0], 
                                 row = thres_row[1])
             #change dst to match parameters sweeped
-            dst = (os.path.join(out, 
+            dst = (os.path.join(out0, 
             "cells_rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}row{}.npy".format(rBP_size,
             fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])),
-                   
-            os.path.join(out, 
+            os.path.join(out0, 
             "intensities_rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}row{}.npy".format(rBP_size,
             fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])))
             
@@ -156,6 +155,7 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
                 fl.close
 
     return
+
 #%%
 if __name__ == "__main__":
     #parallelized for cluster
@@ -184,14 +184,15 @@ if __name__ == "__main__":
         ######################################################################################################
         #NOTE: To adjust parameter sweep, modify ranges below
         ######################################################################################################
-        rBP_size_r = [3,5,7] ###evens seem to not be good  #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
+        rBP_size_r = [1,3] ###evens seem to not be good  #Remove the background with morphological opening (optimised for spherical objects), e.g. (7,7)
         fEMP_hmax_r = [None]# (float or None) h parameter (for instance 20) for the initial h-Max transform, if None, do not perform a h-max transform
         fEMP_size_r = [0] # size in pixels (x,y) for the structure element of the morphological opening
         fEMP_threshold_r = [None] #range(0,10)
         fIP_method_r = ["Max"] #["Max, "Mean"]
         fIP_size_r = [3]
-        dCSP_threshold_r = [100,300,500,700]
-        thresholds_rows = [[(500, 10000), (2,2)], [(1500, 10000), (2,2)], [(20,900), (3,3)]]
+        dCSP_threshold_r = [25,50,75]
+        thresholds_rows = [[(500, 5000), (2,2)], [(1000, 10000), (2,2)], 
+                           [(20,900), (3,3)]]
         ######################################################################################################
         ######################################################################################################
         ######################################################################################################
@@ -207,7 +208,7 @@ if __name__ == "__main__":
             sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, 
                                      fEMP_size_r, fEMP_threshold_r, fIP_method_r, 
                                      fIP_size_r, dCSP_threshold_r, thresholds_rows, tick, optimization_chunk=20,
-                                     cleanup = False, **params)
+                                     cleanup=False, **params)
         except Exception as e:
             print("Jobid {}, Error given {}".format(jobid, e))
 

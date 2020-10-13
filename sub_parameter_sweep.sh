@@ -15,7 +15,7 @@ OUT0=$(sbatch slurm_files/param_sweep_step0.sh)
 echo $OUT0
 
 #run param sweep
-OUT1=$(sbatch --dependency=afterany:${OUT0##* } --array=0-15 slurm_files/param_sweep_step1.sh) 
+OUT1=$(sbatch --dependency=afterok:${OUT0##* } --array=0-35 slurm_files/param_sweep_step1.sh) 
 echo $OUT1
 
 # Usage notes:
