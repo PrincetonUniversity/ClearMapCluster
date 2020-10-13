@@ -5,7 +5,8 @@ Created on Wed Feb 24 22:07:30 2016
 @author: tpisano
 """
 
-import os, sys, cv2, time, re, warnings, shutil, mmap, collections, random, itertools, numpy as np, SimpleITK as sitk, multiprocessing as mp
+import os, sys, cv2, time, re, warnings, shutil, mmap, collections, random
+import itertools, numpy as np, SimpleITK as sitk, multiprocessing as mp
 import scipy.stats, pickle, scipy.ndimage, tifffile
 from joblib import Parallel, delayed 
 from math import ceil

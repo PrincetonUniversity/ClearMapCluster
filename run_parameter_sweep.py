@@ -10,14 +10,13 @@ import os, sys, shutil, pickle, tifffile, numpy as np
 from itertools import product
 from xvfbwrapper import Xvfb; vdisplay = Xvfb(); vdisplay.start()
 from ClearMap.cluster.preprocessing import updateparams, listdirfull, arrayjob, makedir, removedir, pth_update
-from ClearMap.cluster.directorydeterminer import directorydeterminer
 from ClearMap.cluster.par_tools import celldetection_operations,join_results_from_cluster_helper
 from ClearMap.cluster.utils import load_kwargs
 from ClearMap.parameter_file import set_parameters_for_clearmap
 import ClearMap.IO as io
 from ClearMap.Analysis.Statistics import thresholdPoints
 
-systemdirectory = directorydeterminer()
+systemdirectory = "/home/wanglab"
 ###set paths to data
 ###inputdictionary stucture: key=pathtodata value=list["xx", "##"] where xx=regch, injch, or cellch and ##=two digit channel number
 #"regch" = channel to be used for registration, assumption is all other channels are signal
@@ -26,29 +25,40 @@ systemdirectory = directorydeterminer()
 #"##" = when taking a multi channel scan following regexpression, the channel corresponding to the reg/cell/inj channel. I.e. name_of_scan_channel00_Z#### then use "00"
 #e.g.: inputdictionary={path_1: [["regch", "00"]], path_2: [["cellch", "00"], ["injch", "01"]]} ###create this dictionary variable BEFORE params
 inputdictionary={
+<<<<<<< HEAD
 os.path.join(systemdirectory,"LightSheetData/lightserv/jverpeut/ymazecfos_learning_verpeut/ymazecfos_learning_verpeut-008/imaging_request_1/rawdata/resolution_1.3x/200924_072420_jv_ymazelearn_an8_1_3x_488_008na_1hfds_z10um_50msec_16-50-15"): [["regch", "00"]],
 os.path.join(systemdirectory,"LightSheetData/lightserv/jverpeut/ymazecfos_learning_verpeut/ymazecfos_learning_verpeut-008/imaging_request_1/rawdata/resolution_1.3x/200924_072420_jv_ymazelearn_an8_1_3x_647_008na_1hfds_z10um_50msec_16-42-44"): [["cellch", "00"]]
+=======
+os.path.join(systemdirectory, "LightSheetTransfer/brody/z268"): [["regch", "00"], ["cellch", "01"]]
+>>>>>>> 991e433a395418230c1dc9488a0f7faf11408660
 }
 
 ####Required inputs
 params={
 "inputdictionary": inputdictionary, #don"t need to touch
+<<<<<<< HEAD
 "outputdirectory": os.path.join(systemdirectory,"wang/Jess/lightsheet_output/202010_cfos/parameter_sweep/an8"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
 "xyz_scale": (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
+=======
+"outputdirectory": os.path.join(systemdirectory, "Desktop/z268"),
+"xyz_scale": (1.63, 1.63, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
+>>>>>>> 991e433a395418230c1dc9488a0f7faf11408660
 "tiling_overlap": 0.00, #percent overlap taken during tiling
-"AtlasFile" : os.path.join(systemdirectory, "LightSheetTransfer/atlas/sagittal_atlas_20um_iso.tif"), ###it is assumed that input image will be a horizontal scan with anterior being "up"; USE .TIF!!!!
-"annotationfile" :  os.path.join(systemdirectory, "LightSheetTransfer/atlas/annotation_sagittal_atlas_20um_iso.tif"), ###path to annotation file for structures
 "blendtype" : "sigmoidal", #False/None, "linear", or "sigmoidal" blending between tiles, usually sigmoidal; False or None for images where blending would be detrimental;
 "intensitycorrection" : False, #True = calculate mean intensity of overlap between tiles shift higher of two towards lower - useful for images where relative intensity is not important (i.e. tracing=True, cFOS=False)
 "rawdata" : True, # set to true if raw data is taken from scope and images need to be flattened; functionality for rawdata =False has not been tested**
+<<<<<<< HEAD
 "FinalOrientation": (3,2,1), #Orientation: 1,2,3 means the same orientation as the reference and atlas files; #Flip axis with - sign (eg. (-1,2,3) flips x). 3D Rotate by swapping numbers. (eg. (2,1,3) swaps x and y); USE (3,2,1) for DVhorizotnal to sagittal. NOTE (TP): -3 seems to mess up the function and cannot seem to figure out why. do not use.
+=======
+>>>>>>> 991e433a395418230c1dc9488a0f7faf11408660
 "slurmjobfactor": 50, #number of array iterations per arrayjob since max job array on SPOCK is 1000
 }
 
 def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_threshold_r,
                                      fIP_method_r, fIP_size_r, dCSP_threshold_r,thresholds_rows,
-                                     tick, optimization_chunk=4, pth=False, cleanup=True, **kwargs):
+                                     tick, optimization_chunk=4, pth=False, cleanup=True, save=False,
+                                     **kwargs):
     """Function to sweep parameters
 
     final outputs will be saved in outputdirectory/parameter_sweep
@@ -103,27 +113,28 @@ def sweep_parameters_cluster(jobid, rBP_size_r, fEMP_hmax_r, fEMP_size_r, fEMP_t
             
             celldetection_operations(optimization_chunk, testing=True, **kwargs)
 
-            #list, load, and maxip
-            raw = [xx for xx in listdirfull(out0+"/optimization/raw") if "~" not in xx and ".db" not in xx]; raw.sort();
-            raw_im = np.squeeze(tifffile.imread(raw))
-            raw_mx = np.max(raw_im, axis = 0)
-            bkg = [xx for xx in listdirfull(out0+"/optimization/background") if "~" not in xx and "Thumbs.db" not in xx]; bkg.sort()
-            bkg_im = tifffile.imread(bkg)
-            bkg_mx = np.max(bkg_im, axis = 0)
-            cell = [xx for xx in listdirfull(out0+"/optimization/cell") if "~" not in xx and ".db" not in xx]; cell.sort()
-            cell_im = tifffile.imread(cell)
-            cell_mx = np.max(cell_im, axis = 0)
-
-            #concatenate and save out:
-            bigim = np.concatenate((raw_mx, bkg_mx, cell_mx), axis=1)
-            del bkg, bkg_im, bkg_mx, cell, cell_im,cell_mx
-            if cleanup: removedir(out0)
-            if not cleanup: tifffile.imsave(pth, bigim, compress=1)
-
-            #save in main
-            npth = out0+"/rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}tow{}.tif".format(rBP_size,
-        fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])
-            tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
+            if save:
+                #list, load, and maxip
+                raw = [xx for xx in listdirfull(out0+"/optimization/raw") if "~" not in xx and ".db" not in xx]; raw.sort();
+                raw_im = np.squeeze(tifffile.imread(raw))
+                raw_mx = np.max(raw_im, axis = 0)
+                bkg = [xx for xx in listdirfull(out0+"/optimization/background") if "~" not in xx and "Thumbs.db" not in xx]; bkg.sort()
+                bkg_im = tifffile.imread(bkg)
+                bkg_mx = np.max(bkg_im, axis = 0)
+                cell = [xx for xx in listdirfull(out0+"/optimization/cell") if "~" not in xx and ".db" not in xx]; cell.sort()
+                cell_im = tifffile.imread(cell)
+                cell_mx = np.max(cell_im, axis = 0)
+    
+                #concatenate and save out:
+                bigim = np.concatenate((raw_mx, bkg_mx, cell_mx), axis=1)
+                del bkg, bkg_im, bkg_mx, cell, cell_im,cell_mx
+                if cleanup: removedir(out0)
+                if not cleanup: tifffile.imsave(pth, bigim, compress=1)
+    
+                #save in main
+                npth = out0+"/rBPsize{}_fEMPhmax{}_fEMPsize{}_fEMPthres{}_fIPmethod{}_fIPsize{}_dCSPthreshold{}_thres{}row{}.tif".format(rBP_size,
+                            fEMP_hmax, fEMP_size, fEMP_threshold, fIP_method, fIP_size, dCSP_threshold,thres_row[0][0],thres_row[1][0])
+                tifffile.imsave(npth, bigim.astype("uint16"), compress = 1)
 
             #make cells detected array
             dct = pth_update(set_parameters_for_clearmap(testing=True, **nkwargs))
