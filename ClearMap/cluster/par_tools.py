@@ -81,36 +81,26 @@ def celldetection_operations(jobid, testing = False, **params):
     """
     #load
     dct = pth_update(set_parameters_for_clearmap(testing=testing, **params))
-
     #set jobid
     dct["ImageProcessingParameter"]["jobid"]=jobid
-
     #detect cells
     result, substack = detectCells(**dct["ImageProcessingParameter"])
     if result == "ENDPROCESS": return "Jobid > # of jobs required, ending job"
-
     #save raw data for better comparision:
     if testing:
         rawfld = dct["OptimizationLocation"] + "/raw"; makedir(rawfld)
         substack["source"]
-        for xx in range(substack["zCenterIndices"][0], substack["zCenterIndices"][1]):
+        for xx in range(substack["z"][0], substack["z"][1]):
             fl = substack["source"].replace(str("\\d{4}"), str(xx).zfill(4))
             shutil.copy2(fl, rawfld)
-
     return
 
-
-
 def join_results_from_cluster(**params):
-
     #load
     dct=pth_update(set_parameters_for_clearmap(**params))
-
     #join_results
     out = join_results_from_cluster_helper(**dct["ImageProcessingParameter"])
-
     return out
-
 
 def join_results_from_cluster_helper(source, x = all, y = all, z = all, sink = None,
                              chunkSizeMax = 100, chunkSizeMin = 30, chunkOverlap = 15,
@@ -123,8 +113,8 @@ def join_results_from_cluster_helper(source, x = all, y = all, z = all, sink = N
                                    chunkOptimization = False, verbose = verbose);
 
     #load all cell detection job results
-    if type(sink) == tuple: pckfld = os.path.join(sink[0][:sink[0].rfind("/")], "cell_detection"); makedir(pckfld)
-    elif type(sink) == str: pckfld = os.path.join(sink[:sink.rfind("/")], "cell_detection"); makedir(pckfld)
+    if type(sink) == tuple: pckfld = os.path.join(sink[0][:sink[0].rfind("/")], "cells"); makedir(pckfld)
+    elif type(sink) == str: pckfld = os.path.join(sink[:sink.rfind("/")], "cells"); makedir(pckfld)
 
     results = []; fls = listdirfull(pckfld); fls.sort()
     for fl in fls:

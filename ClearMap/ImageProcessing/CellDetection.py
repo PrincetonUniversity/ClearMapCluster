@@ -37,14 +37,13 @@ See Also:
 
 import ClearMap.ImageProcessing.SpotDetection
 import ClearMap.ImageProcessing.IlastikClassification
-
 from ClearMap.ImageProcessing.StackProcessing import parallelProcessStack, sequentiallyProcessStack, sequentiallyProcessStack_usingCluster
 from ClearMap.cluster.preprocessing import pth_update
 from ClearMap.Utils.Timer import Timer
 
 
 def detectCells(jobid, source, sink = None, method ="SpotDetection",
-                processMethod = "sequential", verbose = False, **parameter):
+                processMethod = "sequential", verbose = True, **parameter):
     """Detect cells in data
 
     This is a main script to start running the cell detection.
@@ -64,8 +63,6 @@ def detectCells(jobid, source, sink = None, method ="SpotDetection",
                                      automatically
         verbose (bool): print info
         **parameter (dict): parameter for the image procesing sub-routines
-
-    TP: added JOBID for cluster jobs
 
     Returns:
     """

@@ -47,14 +47,11 @@ the folder "Test/Data/CellShape/cellshape\_\\d{3}.tif".
 
 import sys, imp
 import numpy
-
-
 from ClearMap.ImageProcessing.IlluminationCorrection import correctIllumination
 from ClearMap.ImageProcessing.BackgroundRemoval import removeBackground
 from ClearMap.ImageProcessing.Filter.DoGFilter import filterDoG
 from ClearMap.ImageProcessing.MaximaDetection import findExtendedMaxima, findPixelCoordinates, findIntensity, findCenterOfMaxima
 from ClearMap.ImageProcessing.CellSizeDetection import detectCellShape, findCellSize, findCellIntensity
-
 from ClearMap.Utils.Timer import Timer
 from ClearMap.Utils.ParameterTools import getParameter
 
@@ -91,54 +88,43 @@ def detectSpots(img, detectSpotsParameter = None, correctIlluminationParameter =
     """
 
     timer = Timer();
-    
     # correct illumination
     correctIlluminationParameter = getParameter(detectSpotsParameter, "correctIlluminationParameter", correctIlluminationParameter);
     img1 = img.copy();
     img1 = correctIllumination(img1, correctIlluminationParameter = correctIlluminationParameter, 
                                verbose = verbose, out = out, **parameter)   
-
     # background subtraction in each slice
     #img2 = img.copy();
     removeBackgroundParameter = getParameter(detectSpotsParameter, "removeBackgroundParameter", removeBackgroundParameter);
     img2 = removeBackground(img1, removeBackgroundParameter = removeBackgroundParameter, 
                             verbose = verbose, out = out, **parameter)   
-
     #DoG filter
     filterDoGParameter = getParameter(detectSpotsParameter, "filterDoGParameter", filterDoGParameter);
     dogSize = getParameter(filterDoGParameter, "size", None);
     #img3 = img2.copy();    
     img3 = filterDoG(img2, filterDoGParameter = filterDoGParameter, verbose = verbose, out = out, **parameter);
-    
     # extended maxima
     findExtendedMaximaParameter = getParameter(detectSpotsParameter, "findExtendedMaximaParameter", findExtendedMaximaParameter);
     hMax = getParameter(findExtendedMaximaParameter, "hMax", None);
     imgmax = findExtendedMaxima(img3, findExtendedMaximaParameter = findExtendedMaximaParameter,
-                                verbose = verbose, out = out, **parameter);
-    
+                                verbose = verbose, out = out, **parameter);    
     #center of maxima
     if not hMax is None:
         centers = findCenterOfMaxima(img, imgmax, verbose = verbose, out = out, **parameter);
     else:
-        centers = findPixelCoordinates(imgmax, verbose = verbose, out = out, **parameter);
-    
+        centers = findPixelCoordinates(imgmax, verbose = verbose, out = out, **parameter);    
     #cell size detection
     detectCellShapeParameter = getParameter(detectSpotsParameter, "detectCellShapeParameter", detectCellShapeParameter);
     cellShapeThreshold = getParameter(detectCellShapeParameter, "threshold", None);
     if not cellShapeThreshold is None:
-        
         # cell shape via watershed
         imgshape = detectCellShape(img2, centers, detectCellShapeParameter = detectCellShapeParameter, verbose = verbose, out = out, **parameter);
-        
         #size of cells        
         csize = findCellSize(imgshape, maxLabel = centers.shape[0], out = out, **parameter);
-        
         #intensity of cells
         cintensity = findCellIntensity(img, imgshape,  maxLabel = centers.shape[0], verbose = verbose, out = out, **parameter);
-
         #intensity of cells in background image
         cintensity2 = findCellIntensity(img2, imgshape,  maxLabel = centers.shape[0], verbose = verbose, out = out, **parameter);
-    
         #intensity of cells in dog filtered image
         if dogSize is None:
             cintensity3 = cintensity2;
@@ -147,29 +133,21 @@ def detectSpots(img, detectSpotsParameter = None, correctIlluminationParameter =
         
         if verbose:
             out.write(timer.elapsedTime(head = "Spot Detection") + "\n");
-        
         #remove cell;s of size 0
         idz = csize > 0;
-                       
         return ( centers[idz], numpy.vstack((cintensity[idz], cintensity3[idz], cintensity2[idz], csize[idz])).transpose());        
-        
-    
     else:
         #intensity of cells
         cintensity = findIntensity(img, centers, verbose = verbose, out = out, **parameter);
-
         #intensity of cells in background image
         cintensity2 = findIntensity(img2, centers, verbose = verbose, out = out, **parameter);
-    
         #intensity of cells in dog filtered image
         if dogSize is None:
             cintensity3 = cintensity2;
         else:
             cintensity3 = findIntensity(img3, centers, verbose = verbose, out = out, **parameter);
-
         if verbose:
             out.write(timer.elapsedTime(head = "Spot Detection") + "\n");
-    
         return ( centers, numpy.vstack((cintensity, cintensity3, cintensity2)).transpose());
         
 #%%

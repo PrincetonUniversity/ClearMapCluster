@@ -39,11 +39,8 @@ final total image.
 #:license: GNU, see LICENSE.txt for details.
 
 import sys, math, numpy, os
-
 from multiprocessing import Pool
-
 import ClearMap.IO as io
-
 from ClearMap.Utils.ParameterTools import writeParameter
 from ClearMap.Utils.ProcessWriter import ProcessWriter;
 from ClearMap.Utils.Timer import Timer;
@@ -62,7 +59,7 @@ def printSubStackInfo(subStack, out = sys.stdout):
 
 
 #define the subroutine for the processing
-def _processSubStack(sf, pp, sub, verbose):
+def _processSubStack(sf, pp, sub, verbose=True):
     """Helper to process stack in parallel"""
 
     timer = Timer();
@@ -100,20 +97,21 @@ def writeSubStack(filename, img, subStack = None):
         subStack (dict or None): sub-stack information, if None write entire image
                                  see :ref:`SubStack`
 
-    Returns:
+    Returns
        str or array: the file name pattern or image
+    20201023 ZMD modified to make it make more sense...
     """
 
     if not subStack is None:
         ii = subStack["zSubStackCenterIndices"][0];
         ee = subStack["zSubStackCenterIndices"][1];
-        si = subStack["zCenterIndices"][0];
+        si = subStack["z"][0]; #changed
     else:
         si = 0;
         ii = 0;
         ee = -1;
-
-    return io.writeData(filename, img[:,:,ii:ee], startIndex = si );
+    #return io.writeData(filename, img[:,:,ii:ee], startIndex = si );
+    return io.writeData(filename, img, startIndex = si )
 
 def joinPoints(results, subStacks = None, shiftPoints = True, **args):
     """Joins a list of points obtained from processing a stack in chunks
@@ -462,11 +460,8 @@ def sequentiallyProcessStack_usingCluster(jobid, source, x = all, y = all, z = a
                          chunkOptimization = True, chunkOptimizationSize = all,
                          function = noProcessing, join = joinPoints, verbose = False, **parameter):
 
-
     """Sequential image processing on a stack using CLUSTER - MODIFIED BY TP 10/3/16
-
     Main routine that sequentially processes a large image on sub-stacks.
-
     Arguments:
         jobid = CLUSTER job [TP ADDED]
         source (str): image source
@@ -486,13 +481,11 @@ def sequentiallyProcessStack_usingCluster(jobid, source, x = all, y = all, z = a
         str or array: results of the image processing
     """
     #determine z ranges
-
     subStacks = calculateSubStacks(source, x = x, y = y, z = z,
                                    processes = 1, chunkSizeMax = chunkSizeMax, chunkSizeMin = chunkSizeMin,
                                    chunkOverlap = chunkOverlap, chunkOptimization = chunkOptimization,
                                    chunkOptimizationSize = chunkOptimizationSize,
                                    verbose = verbose);
-
     nSubStacks = len(subStacks);
     if verbose:
         print("Number of SubStacks: %d" % nSubStacks);
@@ -503,26 +496,14 @@ def sequentiallyProcessStack_usingCluster(jobid, source, x = all, y = all, z = a
         return 'ENDPROCESS', 'ENDPROCESS'
     #else:
         #self.printSubStackInfo(subStacks[jobid]);
-
     argdata = [(function, parameter, subStacks[jobid], verbose)]
-
     # process in parallel
     pool = Pool(processes = processes);
     results = pool.starmap(_processSubStack, argdata);
-
-    if type(sink) == tuple: pckfld = os.path.join(sink[0][:sink[0].rfind('/')], 'cell_detection'); makedir(pckfld)
-    elif type(sink) == str: pckfld = os.path.join(sink[:sink.rfind('/')], 'cell_detection'); makedir(pckfld)
+    if type(sink) == tuple: pckfld = os.path.join(sink[0][:sink[0].rfind('/')], "cells"); makedir(pckfld)
+    elif type(sink) == str: pckfld = os.path.join(sink[:sink.rfind('/')], "cells"); makedir(pckfld)
 
     pckloc=os.path.join(pckfld, 'cells_jobid_{}.p'.format(str(jobid).zfill(4))); pckfl=open(pckloc, 'wb'); pickle.dump(results, pckfl); pckfl.close()
 
     print ('Cell detection complete: jobid {},\n     saved as {}'.format(str(jobid).zfill(4), pckloc))
     return pckfld, subStacks[jobid]
-
-    #FIXME: need to save out results to some common place and then reload them into a single file using another job....
-    #FIXME: still need to then make this function utilize multiple cores?
-
-    #join the results
-    #results = join(results, subStacks = subStacks, **parameter);
-
-    #write / or return
-    #return io.writePoints(sink, results);
