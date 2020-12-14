@@ -21,6 +21,8 @@ def directorydeterminer():
         systemdirectory=  "/home/wanglab/"
     elif socket.gethostname() == "PNI-1867VWTQ2":#zmd added
         systemdirectory = "/jukebox/"
+    elif socket.gethostname() == "PNI-18JVVB3W2":#aichen
+        systemdirectory = "/jukebox/"
     elif os.getcwd()[:6] == "/Users":
         systemdirectory= "/Volumes/"
     elif os.getcwd()[:8] == "/Volumes":

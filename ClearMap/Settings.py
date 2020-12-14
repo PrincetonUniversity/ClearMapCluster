@@ -33,6 +33,8 @@ elif directorydeterminer() == "/home/tpisano/":
     ElastixPath = "/usr"    
 elif socket.gethostname() == "PNI-1867VWTQ2" and directorydeterminer() == "/jukebox/":
     ElastixPath = "/usr"
+elif socket.gethostname() == "PNI-18JVVB3W2" and directorydeterminer() == "/jukebox/":
+    ElastixPath = "/usr"
 elif directorydeterminer() == "/jukebox/" and socket.gethostname() != "PNI-1867vwtq2": #spock
     ElastixPath = "/jukebox/pkgs/ELASTIX/4.8"
 else:

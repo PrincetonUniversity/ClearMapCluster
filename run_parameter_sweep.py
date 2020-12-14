@@ -35,7 +35,7 @@ params={
 "inputdictionary": inputdictionary, #don"t need to touch
 "outputdirectory": os.path.join(systemdirectory,"wang/Jess/lightsheet_output/202010_cfos/parameter_sweep/an8"),
 "resample" : False, #False/None, float(e.g: 0.4), amount to resize by: >1 means increase size, <1 means decrease
-"xyz_scale": (5.0, 5.0, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
+"xyz_scale": (5.91, 5.91, 10.0), #micron/pixel; 1.3xobjective w/ 1xzoom 5um/pixel; 4x objective = 1.63um/pixel
 "tiling_overlap": 0.00, #percent overlap taken during tiling
 "blendtype" : "sigmoidal", #False/None, "linear", or "sigmoidal" blending between tiles, usually sigmoidal; False or None for images where blending would be detrimental;
 "intensitycorrection" : False, #True = calculate mean intensity of overlap between tiles shift higher of two towards lower - useful for images where relative intensity is not important (i.e. tracing=True, cFOS=False)
